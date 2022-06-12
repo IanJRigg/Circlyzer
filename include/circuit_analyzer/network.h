@@ -44,7 +44,7 @@ public:
 	virtual ~Network() = default;
 
 	// Create Functions
-	uint32_t create_node();
+	uint32_t create_node(const std::string& alias);
 	uint32_t create_element();
 
 	// Read Functions
@@ -72,10 +72,10 @@ public:
     void destroy_element(const std::string alias);
 
 private:
+	uint32_t find_valid_uid() const;
+
 	std::map<uint32_t, std::shared_ptr<Unique_Entity>> entity_table;
 	std::map<std::string, uint32_t> alias_to_id_table;
-
-	uint32_t id_incrementer;
 };
 
 #endif

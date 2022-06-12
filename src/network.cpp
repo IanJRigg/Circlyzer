@@ -5,8 +5,7 @@
  *************************************************************************************************/
 Network::Network() :
     entity_table(),
-    alias_to_id_table(),
-    id_incrementer{ 0U }
+    alias_to_id_table()
 {
 
 }
@@ -14,9 +13,16 @@ Network::Network() :
 /**********************************************************************************************//**
  * \brief 
  *************************************************************************************************/
-uint32_t Network::create_node()
+uint32_t Network::create_node(const std::string& alias="")
 {
-    return 0U;
+	auto node = std::make_shared<Node>();
+    node->uid = find_valid_uid();
+	node->alias = alias;
+	node->type = Entity_Type::Node;
+
+	entity_table.insert({ node->uid, node });
+
+    return node->uid;
 }
 
 /**********************************************************************************************//**
@@ -139,4 +145,27 @@ void Network::destroy_node(const std::string& alias)
 void Network::destroy_element(const std::string alias)
 {
 
+}
+
+/**********************************************************************************************//**
+ * \brief Iterates over the entity table. Since the std::map is stored in sorted order, the
+ *        iteration will happen in sorted order. If N uids have been reserved, and they were all
+ *        allocated in perfect serial order, this function will return N + 1. If a gap exists in
+ *        allocation, this function will find that gap before N+1 is reached.
+ * 
+ * \note  This may be a potential performance issue on larger networks. But for now, I'll ignore
+ *        that as it is very unlikely.
+ *************************************************************************************************/
+uint32_t Network::find_valid_uid() const
+{
+	uint32_t attempted_id = 0U;
+	for(auto it = entity_table.cbegin(); it != entity_table.cend(); ++it)
+	{
+        if(it->first < attempted_id)
+        {
+        	return attempted_id;
+        }
+
+        ++attempted_id;
+	}
 }
