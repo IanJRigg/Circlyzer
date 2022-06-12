@@ -20,4 +20,6 @@ project(
 )
 
 add_subdirectory(src)
-add_subdirectory(test)
+
+# Disabled for now. Will enable after evaluating GTest
+#add_subdirectory(test)
