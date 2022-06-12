@@ -1,12 +1,15 @@
 # Circuit Analysis Lib
 I'm going to be honest, I got really tired of analyzing circuits by hand. If I feel like it, I may implement this into a QT application for circuit analysis.
 
-Development Path:
-1. Network Creation
-2. Network Simplification (Resistors in DC)
-3. Loop Detection
-4. KVL Analysis
-5. KCL Analysis
-6. Node/Mesh Analysis
-7. Thevenin/Norton Equivalence
-8. Introduction of Capacitors and Inductors
+Development Path: 
+1. Test suite evaluation (Conversion to Google Test)
+2. Network Creation
+   - [ ] Proof of concept (Nodes and Elements)
+   - [ ] Evaluate memory safety of the network 
+3. Network Simplification (Resistors in DC)
+4. Loop Detection
+5. KVL Analysis
+6. KCL Analysis
+7. Node/Mesh Analysis
+8. Thevenin/Norton Equivalence
+9. Introduction of Capacitors and Inductors
