@@ -41,11 +41,6 @@ set_target_properties(
         VERSION ${PROJECT_VERSION}
         SOVERSION ${PROEJCT_SO_VERSION}
 
-        # C++ version information
-        CXX_STANDARD 20
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
-
         # Public Header file location
         PUBLIC_HEADER "${HEADER_FILES}"
 )

@@ -13,13 +13,17 @@ set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/)
 set(PROJECT_NAME circuit_analyzer)
 set(PROJECT_VERSION 1.0.0)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 project(
     ${PROJECT_NAME} 
     VERSION ${PROJECT_VERSION}
     LANGUAGES CXX
 )
 
-add_subdirectory(src)
+enable_testing()
 
-# Disabled for now. Will enable after evaluating GTest
-#add_subdirectory(test)
+add_subdirectory(src)
+add_subdirectory(test)
