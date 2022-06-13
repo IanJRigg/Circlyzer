@@ -21,6 +21,8 @@ enum class Entity_Type
 
 struct Unique_Entity
 {
+	virtual ~Unique_Entity() = default;
+
     uint32_t uid;
     std::string alias;
     Entity_Type type;
@@ -28,12 +30,14 @@ struct Unique_Entity
 
 struct Element : Unique_Entity
 {
+	virtual ~Element() = default;
     std::unique_ptr<Component> component;
     std::array<std::weak_ptr<Node>, 2> terminals;
 };
 
 struct Node : Unique_Entity
 {
+	virtual ~Node() = default;
     std::vector<std::weak_ptr<Element>> elements;
 };
 
@@ -45,7 +49,7 @@ public:
 
 	// Create Functions
 	uint32_t create_node(const std::string& alias);
-	uint32_t create_element();
+	uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias);
 
 	// Read Functions
 	const Node& get_node(uint32_t uid) const;

@@ -27,10 +27,20 @@ uint32_t Network::create_node(const std::string& alias="")
 
 /**********************************************************************************************//**
  * \brief 
+ * \param component
+ * \param alias
  *************************************************************************************************/
-uint32_t Network::create_element()
+uint32_t Network::create_element(std::unique_ptr<Component> component, const std::string& alias)
 {
-    return 0U;
+    auto element = std::make_shared<Element>();
+    element->uid = find_valid_uid();
+    element->alias = alias;
+    element->type = Entity_Type::Element;
+    element->component = std::move(component);
+
+    entity_table.insert({ element->uid, element });
+
+    return element->uid;
 }
 
 /**********************************************************************************************//**
@@ -39,7 +49,18 @@ uint32_t Network::create_element()
  *************************************************************************************************/
 const Node& Network::get_node(const uint32_t uid) const
 {
+    if(entity_table.find(uid) == entity_table.end())
+    {
+        throw std::out_of_range("UID no found in the circuit");
+    }
 
+    const auto entity_ptr = entity_table.at(uid);
+    if(entity_ptr->type != Entity_Type::Node)
+    {
+        throw std::runtime_error("Invalid type requested");
+    }
+
+    return *(dynamic_pointer_cast<Node>(entity_ptr));
 }
 
 /**********************************************************************************************//**
@@ -48,7 +69,18 @@ const Node& Network::get_node(const uint32_t uid) const
  *************************************************************************************************/
 const Element& Network::get_element(const uint32_t uid) const
 {
+    if(entity_table.find(uid) == entity_table.end())
+    {
+        throw std::out_of_range("UID no found in the circuit");
+    }
 
+    const auto entity_ptr = entity_table.at(uid);
+    if(entity_ptr->type != Entity_Type::Element)
+    {
+        throw std::runtime_error("Invalid type requested");
+    }
+
+    return *(dynamic_pointer_cast<Element>(entity_ptr));
 }
 
 /**********************************************************************************************//**
