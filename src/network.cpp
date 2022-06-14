@@ -5,7 +5,9 @@
  *************************************************************************************************/
 Network::Network() :
     entity_table(),
-    alias_to_id_table()
+    alias_to_id_table(),
+    number_of_nodes{ 0U },
+    number_of_elements{ 0U }
 {
 
 }
@@ -21,6 +23,7 @@ uint32_t Network::create_node(const std::string& alias="")
 	node->type = Entity_Type::Node;
 
 	entity_table.insert({ node->uid, node });
+    ++number_of_nodes;
 
     return node->uid;
 }
@@ -39,6 +42,7 @@ uint32_t Network::create_element(std::unique_ptr<Component> component, const std
     element->component = std::move(component);
 
     entity_table.insert({ element->uid, element });
+    ++number_of_elements;
 
     return element->uid;
 }
@@ -47,56 +51,76 @@ uint32_t Network::create_element(std::unique_ptr<Component> component, const std
  * \brief 
  * \param uid 
  *************************************************************************************************/
-const Node& Network::get_node(const uint32_t uid) const
+std::weak_ptr<const Node> Network::get_node(const uint32_t uid) const
 {
-    if(entity_table.find(uid) == entity_table.end())
+    if(uid_does_not_exist(uid))
     {
-        throw std::out_of_range("UID no found in the circuit");
+        return { };
     }
 
     const auto entity_ptr = entity_table.at(uid);
     if(entity_ptr->type != Entity_Type::Node)
     {
-        throw std::runtime_error("Invalid type requested");
+        return { };
     }
 
-    return *(dynamic_pointer_cast<Node>(entity_ptr));
+    return dynamic_pointer_cast<Node>(entity_ptr);
 }
 
 /**********************************************************************************************//**
  * \brief 
  * \param uid 
  *************************************************************************************************/
-const Element& Network::get_element(const uint32_t uid) const
+std::weak_ptr<const Element> Network::get_element(const uint32_t uid) const
 {
-    if(entity_table.find(uid) == entity_table.end())
+    if(uid_does_not_exist(uid))
     {
-        throw std::out_of_range("UID no found in the circuit");
+        return { };
     }
 
     const auto entity_ptr = entity_table.at(uid);
     if(entity_ptr->type != Entity_Type::Element)
     {
-        throw std::runtime_error("Invalid type requested");
+        return { };
     }
 
-    return *(dynamic_pointer_cast<Element>(entity_ptr));
+    return dynamic_pointer_cast<Element>(entity_ptr);
 }
 
 /**********************************************************************************************//**
  * \brief 
  * \param alias 
  *************************************************************************************************/
-const Node& Network::get_node(const std::string& alias) const
+std::weak_ptr<const Node> Network::get_node(const std::string& alias) const
 {
+    if(alias_does_not_exist(alias))
+    {
+        return { };
+    }
 
+    return get_node(alias_to_id_table.at(alias));
 }
 
 /**********************************************************************************************//**
  * \brief 
  * \param alias 
  *************************************************************************************************/
-const Element& Network::get_element(const std::string& alias) const
+std::weak_ptr<const Element> Network::get_element(const std::string& alias) const
+{
+    if(alias_does_not_exist(alias))
+    {
+        return { };
+    }
+
+    return get_element(alias_to_id_table.at(alias));
+}
+
+/**********************************************************************************************//**
+ * \brief 
+ * \param first_entity
+ * \param second_entity 
+ *************************************************************************************************/
+void Network::create_connection_between(const uint32_t first_uid, const uint32_t second_uid)
 {
 
 }
@@ -106,7 +130,7 @@ const Element& Network::get_element(const std::string& alias) const
  * \param first_entity
  * \param second_entity 
  *************************************************************************************************/
-void Network::create_connection_between(const uint32_t first_entity, const uint32_t second_entity)
+void Network::delete_connection_between(const uint32_t first_uid, const uint32_t second_uid)
 {
 
 }
@@ -116,7 +140,8 @@ void Network::create_connection_between(const uint32_t first_entity, const uint3
  * \param first_entity
  * \param second_entity 
  *************************************************************************************************/
-void Network::delete_connection_between(const uint32_t first_entity, const uint32_t second_entity)
+void Network::create_connection_between(const std::string& first_alias,
+                                        const std::string& second_alias)
 {
 
 }
@@ -126,19 +151,8 @@ void Network::delete_connection_between(const uint32_t first_entity, const uint3
  * \param first_entity
  * \param second_entity 
  *************************************************************************************************/
-void Network::create_connection_between(const std::string& first_entity,
-                                        const std::string& second_entity)
-{
-
-}
-
-/**********************************************************************************************//**
- * \brief 
- * \param first_entity
- * \param second_entity 
- *************************************************************************************************/
-void Network::delete_connection_between(const std::string& first_entity,
-	                                    const std::string& second_entity)
+void Network::delete_connection_between(const std::string& first_alias,
+	                                    const std::string& second_alias)
 {
 
 }
@@ -149,7 +163,29 @@ void Network::delete_connection_between(const std::string& first_entity,
  *************************************************************************************************/
 void Network::destroy_node(const uint32_t uid)
 {
+    if(uid_does_not_exist(uid))
+    {
+        return;
+    }
 
+    // TODO: Merge the Node and Element paths into one set of functions
+    auto entity_ptr = entity_table.at(uid);
+    if(entity_ptr->type != Entity_Type::Node)
+    {
+        return;
+    }
+
+    // Retrieve the alias prior to deletion. This is so we can update alias_to_uid correctly
+    const auto alias = entity_ptr->alias;
+
+    // Cast down to the node object to ensure all destructors get called
+    auto node_ptr = dynamic_pointer_cast<Element>(entity_ptr);
+    node_ptr.reset();
+
+    entity_table.erase(uid);
+    alias_to_id_table.erase(alias);
+
+    --number_of_nodes;
 }
 
 /**********************************************************************************************//**
@@ -158,7 +194,29 @@ void Network::destroy_node(const uint32_t uid)
  *************************************************************************************************/
 void Network::destroy_element(const uint32_t uid)
 {
+    if(uid_does_not_exist(uid))
+    {
+        return;
+    }
 
+    // TODO: Merge the Node and Element paths into one set of functions
+    auto entity_ptr = entity_table.at(uid);
+    if(entity_ptr->type != Entity_Type::Element)
+    {
+        return;
+    }
+
+    // Retrieve the alias prior to deletion. This is so we can update alias_to_uid correctly
+    const auto alias = entity_ptr->alias;
+
+    // Cast down to the element object to ensure all destructors get called
+    auto element_ptr = dynamic_pointer_cast<Element>(entity_ptr);
+    element_ptr.reset();
+
+    entity_table.erase(uid);
+    alias_to_id_table.erase(alias);
+
+    --number_of_elements;
 }
 
 /**********************************************************************************************//**
@@ -167,7 +225,8 @@ void Network::destroy_element(const uint32_t uid)
  *************************************************************************************************/
 void Network::destroy_node(const std::string& alias)
 {
-
+    alias_does_not_exist(alias);
+    destroy_node(alias_to_id_table.at(alias));
 }
 
 /**********************************************************************************************//**
@@ -176,7 +235,24 @@ void Network::destroy_node(const std::string& alias)
  *************************************************************************************************/
 void Network::destroy_element(const std::string alias)
 {
+    alias_does_not_exist(alias);
+    destroy_element(alias_to_id_table.at(alias));
+}
 
+/**********************************************************************************************//**
+ * \brief Accessor for number_of_nodes
+ *************************************************************************************************/
+uint32_t Network::get_number_of_nodes() const
+{
+    return number_of_nodes;
+}
+
+/**********************************************************************************************//**
+ * \brief Accessor for number_of_elements
+ *************************************************************************************************/
+uint32_t Network::get_number_of_elements() const
+{
+    return number_of_elements;
 }
 
 /**********************************************************************************************//**
@@ -200,4 +276,22 @@ uint32_t Network::find_valid_uid() const
 
         ++attempted_id;
 	}
+}
+
+/**********************************************************************************************//**
+ * \brief 
+ * \param alias 
+ *************************************************************************************************/
+bool Network::uid_does_not_exist(const uint32_t uid) const
+{
+    return (entity_table.find(uid) == entity_table.end());
+}
+
+/**********************************************************************************************//**
+ * \brief 
+ * \param alias 
+ *************************************************************************************************/
+bool Network::alias_does_not_exist(const std::string& alias) const
+{
+    return (alias_to_id_table.find(alias) == alias_to_id_table.end());
 }
