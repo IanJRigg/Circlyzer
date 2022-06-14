@@ -1,4 +1,4 @@
-# **Circ**uit Ana**lyzer** 
+# [Circ]uit Ana[lyzer] 
 I'm going to be honest, I got really tired of analyzing circuits by hand. If I feel like it, I may implement this into a QT application for circuit analysis.
 
 Development Path: 
