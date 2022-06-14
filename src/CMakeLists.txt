@@ -8,7 +8,7 @@ endif()
 ###############################################################################
 set(PROEJCT_SO_VERSION 1)
 
-set(CIRCUIT_ANALYZER_INCLUDE_DIR ${INCLUDE_DIR}/circuit_analyzer/)
+set(CIRCUIT_ANALYZER_INCLUDE_DIR ${INCLUDE_DIR}/circlyzer/)
 
 set(SOURCE_FILES
     network.cpp

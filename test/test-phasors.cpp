@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "circuit_analyzer/phasors.h"
+#include "circlyzer/phasors.h"
 
 TEST(PhasorCheckout, CheckForTrue)
 {

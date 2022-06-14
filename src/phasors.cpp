@@ -1,4 +1,4 @@
-#include "circuit_analyzer/phasors.h"
+#include "circlyzer/phasors.h"
 
 using namespace std::complex_literals;
 

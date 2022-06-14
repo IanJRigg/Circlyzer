@@ -1,4 +1,4 @@
-#include "circuit_analyzer/network.h"
+#include "circlyzer/network.h"
 
 /**********************************************************************************************//**
  * \brief 

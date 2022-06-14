@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "circuit_analyzer/network.h"
+#include "circlyzer/network.h"
 
 // uint32_t create_node(const std::string& alias);
 // uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias);
