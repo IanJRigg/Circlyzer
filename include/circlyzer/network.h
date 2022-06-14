@@ -50,8 +50,8 @@ public:
 	virtual ~Network() = default;
 
 	// Create Functions
-	uint32_t create_node(const std::string& alias);
-	uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias);
+	uint32_t create_node(const std::string& alias="");
+	uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias="");
 
 	// Read Functions
 	std::weak_ptr<const Node> get_node(uint32_t uid) const;

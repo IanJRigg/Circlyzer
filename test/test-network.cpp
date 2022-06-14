@@ -28,8 +28,20 @@ TEST(Network, Constructor)
     EXPECT_EQ(network.get_number_of_elements(), 0);
 }
 
-TEST(Network, NodeCreation)
+TEST(Network, NodeCreationWithNoAlias)
 {
     Network network;
+    EXPECT_EQ(network.get_number_of_nodes(), 0);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
 
+    auto first_uid = network.create_node();
+    EXPECT_EQ(network.get_number_of_nodes(), 1);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(first_uid, 0);
+
+
+    auto second_uid = network.create_node();
+    EXPECT_EQ(network.get_number_of_nodes(), 2);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(second_uid, 1);
 }

@@ -15,7 +15,7 @@ Network::Network() :
 /**********************************************************************************************//**
  * \brief 
  *************************************************************************************************/
-uint32_t Network::create_node(const std::string& alias="")
+uint32_t Network::create_node(const std::string& alias)
 {
 	auto node = std::make_shared<Node>();
     node->uid = find_valid_uid();
@@ -271,11 +271,13 @@ uint32_t Network::find_valid_uid() const
 	{
         if(it->first < attempted_id)
         {
-        	return attempted_id;
+        	break;
         }
 
         ++attempted_id;
 	}
+
+    return attempted_id;
 }
 
 /**********************************************************************************************//**
