@@ -32,7 +32,7 @@ struct Element : Unique_Entity
 {
 	virtual ~Element() = default;
 
-    std::unique_ptr<Component> component;
+    std::shared_ptr<Component> component;
     std::array<std::weak_ptr<Node>, 2> terminals;
 };
 
@@ -54,11 +54,8 @@ public:
 	uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias="");
 
 	// Read Functions
-	std::weak_ptr<const Node> get_node(uint32_t uid) const;
-	std::weak_ptr<const Element> get_element(uint32_t uid) const;
-
-	std::weak_ptr<const Node> get_node(const std::string& alias) const;
-	std::weak_ptr<const Element> get_element(const std::string& alias) const;
+	const Component& get_component(uint32_t uid) const;
+	const Component& get_component(const std::string& alias) const;
 
 	// Update Functions
 	void create_connection_between(uint32_t first_uid, uint32_t second_uid);

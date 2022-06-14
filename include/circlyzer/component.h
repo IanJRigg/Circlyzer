@@ -13,11 +13,28 @@ enum class Component_Type : uint32_t
 
 struct Component
 {
+    Component(const Component_Type type) :
+        type(type) 
+    { 
+
+    }
+
+    virtual ~Component() = default;
+
     Component_Type type;
 };
 
 struct Resistor : Component
 {
+    Resistor(const double resistance) : 
+        Component(Component_Type::Resistor), 
+        resistance(resistance) 
+    {
+
+    }
+
+    virtual ~Resistor() = default;
+
     double resistance;
 
     std::complex<double> get_impedence() const

@@ -1,47 +1,71 @@
 #include "gtest/gtest.h"
 #include "circlyzer/network.h"
+#include "circlyzer/component.h"
+#include "circlyzer/units.h"
 
-// uint32_t create_node(const std::string& alias);
-// uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias);
-// std::weak_ptr<const Node> get_node(uint32_t uid) const;
-// std::weak_ptr<const Element> get_element(uint32_t uid) const;
-// std::weak_ptr<const Node> get_node(const std::string& alias) const;
-// std::weak_ptr<const Element> get_element(const std::string& alias) const;
-// void create_connection_between(uint32_t first_uid, uint32_t second_uid);
-// void delete_connection_between(uint32_t first_uid, uint32_t second_uid);
-// void create_connection_between(const std::string& first_alias, 
-// 	                           const std::string& second_alias);
-// void delete_connection_between(const std::string& first_alias,
-// 	                           const std::string& second_alias);
-// void destroy_node(uint32_t uid);
-// void destroy_element(uint32_t uid);
-// void destroy_node(const std::string& alias);
-// void destroy_element(const std::string alias);
-// uint32_t get_number_of_nodes() const;
-// uint32_t get_number_of_elements() const;
+#include <memory>
 
 TEST(Network, Constructor)
 {
     Network network;
 
+    // Check entity counts
     EXPECT_EQ(network.get_number_of_nodes(), 0);
     EXPECT_EQ(network.get_number_of_elements(), 0);
 }
 
-TEST(Network, NodeCreationWithNoAlias)
+TEST(Network, NodeCreation)
 {
     Network network;
+
+    // Check entity counts
     EXPECT_EQ(network.get_number_of_nodes(), 0);
     EXPECT_EQ(network.get_number_of_elements(), 0);
 
     auto first_uid = network.create_node();
+
+    // Check entity counts and UID identity
     EXPECT_EQ(network.get_number_of_nodes(), 1);
     EXPECT_EQ(network.get_number_of_elements(), 0);
     EXPECT_EQ(first_uid, 0);
 
-
     auto second_uid = network.create_node();
+
+    // Check entity counts and UID identity
     EXPECT_EQ(network.get_number_of_nodes(), 2);
     EXPECT_EQ(network.get_number_of_elements(), 0);
     EXPECT_EQ(second_uid, 1);
+}
+
+TEST(Network, ElementCreation)
+{
+    Network network;
+
+    // Check entity counts
+    EXPECT_EQ(network.get_number_of_nodes(), 0);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+
+    auto resistor = std::make_unique<Resistor>(1.0_ohm);
+    auto first_uid = network.create_element(std::move(resistor));
+
+    // Make sure that ownership has been correctly transfered away from resistor
+    EXPECT_EQ(resistor.get(), nullptr);
+
+    // Check entity counts and UID identity
+    EXPECT_EQ(network.get_number_of_nodes(), 0);
+    EXPECT_EQ(network.get_number_of_elements(), 1);
+    EXPECT_EQ(first_uid, 0);
+}
+
+TEST(Network, NodeAccess)
+{
+    Network network;
+    auto resistor = std::make_unique<Resistor>(1.0_ohm);
+    auto first_uid = network.create_element(std::move(resistor));
+    const auto& component = network.get_component(first_uid);
+
+    EXPECT_EQ(component.type, Component_Type::Resistor);
+
+    const auto& resistor_reference = dynamic_cast<const Resistor&>(component);
+    EXPECT_EQ(resistor_reference.resistance, 1.0_ohm);
 }

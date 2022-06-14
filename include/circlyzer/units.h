@@ -2,49 +2,49 @@
 #define UNITS_H
 
 // Ohms
-double operator"" _ohm(const double x)
+double operator"" _ohm(long double x)
 {
     return x;
 }
 
-double operator"" _kohm(const double x)
+double operator"" _kohm(long double x)
 {
 	return x * 1000;
 }
 
-double operator"" _Mohm(const double x)
+double operator"" _Mohm(long double x)
 {
 	return x * 1000000;
 }
 
 // Farads
-double operator"" _F(const double x)
+double operator"" _F(long double x)
 {
 	return x;
 }
 
-double operator"" _mF(const double x)
+double operator"" _mF(long double x)
 {
     return x / 1000;
 }
 
-double operator"" _muF(const double x)
+double operator"" _muF(long double x)
 {
 	return x / 1000000;
 }
 
-double operator"" _nF(const double x)
+double operator"" _nF(long double x)
 {
 	return x / 1000000000;
 }
 
 // Henrys
-double operator"" _H(const double x)
+double operator"" _H(long double x)
 {
 	return x;
 }
 
-double operator"" _mH(const double x)
+double operator"" _mH(long double x)
 {
 	return x / 1000;
 }

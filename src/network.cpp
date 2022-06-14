@@ -51,68 +51,36 @@ uint32_t Network::create_element(std::unique_ptr<Component> component, const std
  * \brief 
  * \param uid 
  *************************************************************************************************/
-std::weak_ptr<const Node> Network::get_node(const uint32_t uid) const
+const Component& Network::get_component(const uint32_t uid) const
 {
     if(uid_does_not_exist(uid))
     {
-        return { };
-    }
-
-    const auto entity_ptr = entity_table.at(uid);
-    if(entity_ptr->type != Entity_Type::Node)
-    {
-        return { };
-    }
-
-    return dynamic_pointer_cast<Node>(entity_ptr);
-}
-
-/**********************************************************************************************//**
- * \brief 
- * \param uid 
- *************************************************************************************************/
-std::weak_ptr<const Element> Network::get_element(const uint32_t uid) const
-{
-    if(uid_does_not_exist(uid))
-    {
-        return { };
+        throw std::runtime_error("Invalid uid provied: " + std::to_string(uid));
     }
 
     const auto entity_ptr = entity_table.at(uid);
     if(entity_ptr->type != Entity_Type::Element)
     {
-        return { };
+        throw std::runtime_error("Invalid entity request. Please request an element");
     }
 
-    return dynamic_pointer_cast<Element>(entity_ptr);
+    const auto element = dynamic_cast<const Element&>(*entity_ptr);
+
+    return *(element.component);
 }
 
 /**********************************************************************************************//**
  * \brief 
  * \param alias 
  *************************************************************************************************/
-std::weak_ptr<const Node> Network::get_node(const std::string& alias) const
+const Component& Network::get_component(const std::string& alias) const
 {
     if(alias_does_not_exist(alias))
     {
-        return { };
+        throw std::runtime_error("Invalid alias provied: " + alias);
     }
 
-    return get_node(alias_to_id_table.at(alias));
-}
-
-/**********************************************************************************************//**
- * \brief 
- * \param alias 
- *************************************************************************************************/
-std::weak_ptr<const Element> Network::get_element(const std::string& alias) const
-{
-    if(alias_does_not_exist(alias))
-    {
-        return { };
-    }
-
-    return get_element(alias_to_id_table.at(alias));
+    return get_component(alias_to_id_table.at(alias));
 }
 
 /**********************************************************************************************//**
