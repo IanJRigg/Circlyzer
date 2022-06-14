@@ -57,12 +57,51 @@ TEST(Network, ElementCreation)
     EXPECT_EQ(first_uid, 0);
 }
 
-TEST(Network, NodeAccess)
+TEST(Network, AccessComponentWithInvalidUid)
+{
+    Network network;
+    EXPECT_THROW(network.get_component(0xDEADBEEFU), std::out_of_range);
+}
+
+TEST(Network, AccessComponentWithInvalidType)
+{
+    Network network;
+    auto first_uid = network.create_node();
+    EXPECT_THROW(network.get_component(first_uid), std::runtime_error);
+}
+
+TEST(Network, SuccessfullyAccessComponent)
 {
     Network network;
     auto resistor = std::make_unique<Resistor>(1.0_ohm);
     auto first_uid = network.create_element(std::move(resistor));
     const auto& component = network.get_component(first_uid);
+
+    EXPECT_EQ(component.type, Component_Type::Resistor);
+
+    const auto& resistor_reference = dynamic_cast<const Resistor&>(component);
+    EXPECT_EQ(resistor_reference.resistance, 1.0_ohm);
+}
+
+TEST(Network, AccessComponentWithInvalidAlias)
+{
+    Network network;
+    EXPECT_THROW(network.get_component("DEAD BEEF!"), std::out_of_range);
+}
+
+TEST(Network, AccessComponentViaAliasWithInvalidType)
+{
+    Network network;
+    auto first_uid = network.create_node("DEAD BEEF!");
+    EXPECT_THROW(network.get_component(first_uid), std::runtime_error);
+}
+
+TEST(Network, SuccessfullyAccessComponentViaAlias)
+{
+    Network network;
+    auto resistor = std::make_unique<Resistor>(1.0_ohm);
+    auto first_uid = network.create_element(std::move(resistor), "DEAD BEEF!");
+    const auto& component = network.get_component("DEAD BEEF!");
 
     EXPECT_EQ(component.type, Component_Type::Resistor);
 

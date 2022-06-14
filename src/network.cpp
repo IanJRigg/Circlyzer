@@ -23,6 +23,7 @@ uint32_t Network::create_node(const std::string& alias)
 	node->type = Entity_Type::Node;
 
 	entity_table.insert({ node->uid, node });
+    alias_to_id_table.insert({ alias, node->uid });
     ++number_of_nodes;
 
     return node->uid;
@@ -42,6 +43,7 @@ uint32_t Network::create_element(std::unique_ptr<Component> component, const std
     element->component = std::move(component);
 
     entity_table.insert({ element->uid, element });
+    alias_to_id_table.insert({ alias, element->uid });
     ++number_of_elements;
 
     return element->uid;
@@ -55,7 +57,7 @@ const Component& Network::get_component(const uint32_t uid) const
 {
     if(uid_does_not_exist(uid))
     {
-        throw std::runtime_error("Invalid uid provied: " + std::to_string(uid));
+        throw std::out_of_range("Invalid uid provided: " + std::to_string(uid));
     }
 
     const auto entity_ptr = entity_table.at(uid);
@@ -77,7 +79,7 @@ const Component& Network::get_component(const std::string& alias) const
 {
     if(alias_does_not_exist(alias))
     {
-        throw std::runtime_error("Invalid alias provied: " + alias);
+        throw std::out_of_range("Invalid alias provided: " + alias);
     }
 
     return get_component(alias_to_id_table.at(alias));
