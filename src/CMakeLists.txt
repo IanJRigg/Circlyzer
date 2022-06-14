@@ -6,7 +6,6 @@ endif()
 
 # Application Configuration
 ###############################################################################
-set(APPLICATION_NAME ${PROJECT_NAME})
 set(PROEJCT_SO_VERSION 1)
 
 set(CIRCUIT_ANALYZER_INCLUDE_DIR ${INCLUDE_DIR}/circuit_analyzer/)
@@ -28,14 +27,15 @@ set(PRIVATE_HEADER_FILES
 )
 
 add_library(
-    ${APPLICATION_NAME}
-    ${SOURCE_FILES}
-    ${PUBLIC_HEADER_FILES}
-    ${PRIVATE_HEADER_FILES}
+    ${LIBRARY_NAME}
+    SHARED
+        ${SOURCE_FILES}
+        ${PUBLIC_HEADER_FILES}
+        ${PRIVATE_HEADER_FILES}
 )
 
 set_target_properties(
-    ${APPLICATION_NAME}
+    ${LIBRARY_NAME}
     PROPERTIES
         # Project specific versions
         VERSION ${PROJECT_VERSION}
@@ -46,7 +46,7 @@ set_target_properties(
 )
 
 target_compile_options(
-    ${APPLICATION_NAME}
+    ${LIBRARY_NAME}
     PRIVATE
         -Wall
         -Wextra
@@ -54,13 +54,13 @@ target_compile_options(
 )
 
 target_include_directories(
-    ${APPLICATION_NAME}
+    ${LIBRARY_NAME}
     PRIVATE
         ${SRC_DIR}
         ${INCLUDE_DIR}
 )
 
 target_link_libraries(
-    ${APPLICATION_NAME}
+    ${LIBRARY_NAME}
     PUBLIC
 )

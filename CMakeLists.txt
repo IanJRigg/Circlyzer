@@ -10,12 +10,8 @@ set(SRC_DIR ${CMAKE_SOURCE_DIR}/src/)
 set(TEST_DIR ${CMAKE_SOURCE_DIR}/test/)
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include/)
 
-set(PROJECT_NAME circuit_analyzer)
+set(PROJECT_NAME circlyzer)
 set(PROJECT_VERSION 1.0.0)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 project(
     ${PROJECT_NAME} 
@@ -23,7 +19,15 @@ project(
     LANGUAGES CXX
 )
 
-enable_testing()
+set(LIBRARY_NAME circlyzer)
+set(TEST_SUITE_NAME circlyzer_test)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 
 add_subdirectory(src)
+
+enable_testing()
 add_subdirectory(test)

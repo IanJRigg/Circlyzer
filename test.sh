@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd build
-./test/testRunner
+./test/circlyzer_test
