@@ -1,4 +1,5 @@
 #include "circlyzer/network.h"
+#include "circlyzer/exceptions.h"
 
 namespace
 {
@@ -24,16 +25,32 @@ Network::Network() :
  *************************************************************************************************/
 uint32_t Network::create_node(const std::string& alias)
 {
-    // TODO: don't populate the alias if given an empty alias?
-    // TODO: what to do if a duplicate alias is provided?
+    // Size check
+    if(alias.size() >= DEFAULT_ALIAS_LENGTH_LIMIT)
+    {
+        throw Invalid_Alias_Exception();
+    }
 
+    // Duplicate check
+    if(alias_to_id_table.find(alias) != alias_to_id_table.end())
+    {
+        throw Duplicate_Alias_Exception();
+    }
+
+    // Create the node
     auto node = std::make_shared<Node>();
     node->uid = find_valid_uid();
     node->alias = alias;
     node->type = Entity_Type::Node;
 
+    // Insert all non-empty string aliases once they've been cleared for insertion
+    if(alias.size() > 0)
+    {
+        alias_to_id_table.insert({ alias, node->uid });
+    }
+
+    // Insert the element
     entity_table.insert({ node->uid, node });
-    alias_to_id_table.insert({ alias, node->uid });
     ++number_of_nodes;
 
     return node->uid;
@@ -48,17 +65,38 @@ uint32_t Network::create_element(std::unique_ptr<Component> component, const std
 {
     // TODO: don't populate the alias if given an empty alias?
     // TODO: what to do if a duplicate alias is provided?
-    // TODO: what to do if a provided component is null?
+    if(component == nullptr)
+    {
+        throw Null_Component_Exception();
+    }
 
+    // Size check
+    if(alias.size() >= DEFAULT_ALIAS_LENGTH_LIMIT)
+    {
+        throw Invalid_Alias_Exception();
+    }
+
+    // Duplicate check
+    if(alias_to_id_table.find(alias) != alias_to_id_table.end())
+    {
+        throw Duplicate_Alias_Exception();
+    }
+
+    // Create the element
     auto element = std::make_shared<Element>();
     element->uid = find_valid_uid();
     element->alias = alias;
     element->type = Entity_Type::Element;
     element->component = std::move(component);
 
-    entity_table.insert({ element->uid, element });
-    alias_to_id_table.insert({ alias, element->uid });
+    // Insert all non-empty string aliases once they've been cleared for insertion
+    if(alias.size() > 0)
+    {
+        alias_to_id_table.insert({ alias, element->uid });
+    }
 
+    // Insert the element
+    entity_table.insert({ element->uid, element });
     ++number_of_elements;
 
     return element->uid;
@@ -72,13 +110,13 @@ const Component& Network::get_component(const uint32_t uid) const
 {
     if(uid_does_not_exist(uid))
     {
-        throw std::out_of_range("Invalid uid provided: " + std::to_string(uid));
+        throw Non_Existant_UID_Exception();
     }
 
     const auto entity_ptr = entity_table.at(uid);
     if(entity_ptr->type != Entity_Type::Element)
     {
-        throw std::runtime_error("Invalid entity request. Please request an element");
+        throw Wrong_Entity_Type_Exception();
     }
 
     const auto element = dynamic_cast<const Element&>(*entity_ptr);
@@ -94,7 +132,7 @@ const Component& Network::get_component(const std::string& alias) const
 {
     if(alias_does_not_exist(alias))
     {
-        throw std::out_of_range("Invalid alias provided: " + alias);
+        throw Non_Existant_Alias_Exception();
     }
 
     return get_component(alias_to_id_table.at(alias));

@@ -2,6 +2,7 @@
 #include "circlyzer/network.h"
 #include "circlyzer/component.h"
 #include "circlyzer/units.h"
+#include "circlyzer/exceptions.h"
 
 #include <memory>
 
@@ -88,7 +89,7 @@ TEST(Network, ElementCreation)
 TEST(Network, AccessComponentWithInvalidUid)
 {
     Network network;
-    EXPECT_THROW(network.get_component(0xDEADBEEFU), std::out_of_range);
+    EXPECT_THROW(network.get_component(0xDEADBEEFU), Non_Existant_UID_Exception);
 }
 
 /**********************************************************************************************//**
@@ -98,7 +99,7 @@ TEST(Network, AccessComponentWithInvalidType)
 {
     Network network;
     auto first_uid = network.create_node();
-    EXPECT_THROW(network.get_component(first_uid), std::runtime_error);
+    EXPECT_THROW(network.get_component(first_uid), Wrong_Entity_Type_Exception);
 }
 
 /**********************************************************************************************//**
@@ -123,7 +124,7 @@ TEST(Network, AccessComponent)
 TEST(Network, AccessComponentWithInvalidAlias)
 {
     Network network;
-    EXPECT_THROW(network.get_component("DEAD BEEF!"), std::out_of_range);
+    EXPECT_THROW(network.get_component("DEAD BEEF!"), Non_Existant_Alias_Exception);
 }
 
 /**********************************************************************************************//**
@@ -133,7 +134,7 @@ TEST(Network, AccessComponentViaAliasWithInvalidType)
 {
     Network network;
     auto first_uid = network.create_node("DEAD BEEF!");
-    EXPECT_THROW(network.get_component(first_uid), std::runtime_error);
+    EXPECT_THROW(network.get_component(first_uid), Wrong_Entity_Type_Exception);
 }
 
 /**********************************************************************************************//**
