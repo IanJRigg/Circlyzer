@@ -13,3 +13,6 @@ Development Path:
 7. Node/Mesh Analysis
 8. Thevenin/Norton Equivalence
 9. Introduction of Capacitors and Inductors
+
+Nice to Haves:
+1. Conversion to the Boost Graph. This would allow for visualizations of the network via the dot visualizer.
