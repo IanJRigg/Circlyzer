@@ -17,6 +17,9 @@ Network::Network() :
  *************************************************************************************************/
 uint32_t Network::create_node(const std::string& alias)
 {
+    // TODO: don't populate the alias if given an empty alias
+    // TODO: what to do if a duplicate alias is provided
+
 	auto node = std::make_shared<Node>();
     node->uid = find_valid_uid();
 	node->alias = alias;
@@ -36,6 +39,9 @@ uint32_t Network::create_node(const std::string& alias)
  *************************************************************************************************/
 uint32_t Network::create_element(std::unique_ptr<Component> component, const std::string& alias)
 {
+    // TODO: don't populate the alias if given an empty alias
+    // TODO: what to do if a duplicate alias is provided
+
     auto element = std::make_shared<Element>();
     element->uid = find_valid_uid();
     element->alias = alias;
@@ -44,6 +50,7 @@ uint32_t Network::create_element(std::unique_ptr<Component> component, const std
 
     entity_table.insert({ element->uid, element });
     alias_to_id_table.insert({ alias, element->uid });
+    
     ++number_of_elements;
 
     return element->uid;
@@ -207,6 +214,22 @@ void Network::destroy_element(const std::string alias)
 {
     alias_does_not_exist(alias);
     destroy_element(alias_to_id_table.at(alias));
+}
+
+/**********************************************************************************************//**
+ * \brief Accessor for number_of_nodes
+ *************************************************************************************************/
+uint32_t Network::get_number_of_entities() const
+{
+    return entity_table.size();
+}
+
+/**********************************************************************************************//**
+ * \brief Accessor for number_of_nodes
+ *************************************************************************************************/
+uint32_t Network::get_number_of_aliases() const
+{
+   return alias_to_id_table.size();
 }
 
 /**********************************************************************************************//**

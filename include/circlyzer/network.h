@@ -21,7 +21,7 @@ enum class Entity_Type
 
 struct Unique_Entity
 {
-	virtual ~Unique_Entity() = default;
+    virtual ~Unique_Entity() = default;
 
     uint32_t uid;
     std::string alias;
@@ -30,7 +30,7 @@ struct Unique_Entity
 
 struct Element : Unique_Entity
 {
-	virtual ~Element() = default;
+    virtual ~Element() = default;
 
     std::shared_ptr<Component> component;
     std::array<std::weak_ptr<Node>, 2> terminals;
@@ -38,7 +38,7 @@ struct Element : Unique_Entity
 
 struct Node : Unique_Entity
 {
-	virtual ~Node() = default;
+    virtual ~Node() = default;
 
     std::vector<std::weak_ptr<Element>> elements;
 };
@@ -46,28 +46,28 @@ struct Node : Unique_Entity
 class Network
 {
 public:
-	Network();
-	virtual ~Network() = default;
+    Network();
+    virtual ~Network() = default;
 
-	// Create Functions
-	uint32_t create_node(const std::string& alias="");
-	uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias="");
+    // Create Functions
+    uint32_t create_node(const std::string& alias="");
+    uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias="");
 
-	// Read Functions
-	const Component& get_component(uint32_t uid) const;
-	const Component& get_component(const std::string& alias) const;
+    // Read Functions
+    const Component& get_component(uint32_t uid) const;
+    const Component& get_component(const std::string& alias) const;
 
-	// Update Functions
-	void create_connection_between(uint32_t first_uid, uint32_t second_uid);
-	void delete_connection_between(uint32_t first_uid, uint32_t second_uid);
+    // Update Functions
+    void create_connection_between(uint32_t first_uid, uint32_t second_uid);
+    void delete_connection_between(uint32_t first_uid, uint32_t second_uid);
 
-	void create_connection_between(const std::string& first_alias, 
-		                           const std::string& second_alias);
+    void create_connection_between(const std::string& first_alias, 
+                                   const std::string& second_alias);
 
-	void delete_connection_between(const std::string& first_alias,
-		                           const std::string& second_alias);
+    void delete_connection_between(const std::string& first_alias,
+                                   const std::string& second_alias);
 
-	// Destroy Functions
+    // Destroy Functions
     void destroy_node(uint32_t uid);
     void destroy_element(uint32_t uid);
 
@@ -75,20 +75,22 @@ public:
     void destroy_element(const std::string alias);
 
     // External Utility Functions
+    uint32_t get_number_of_entities() const;
+    uint32_t get_number_of_aliases() const;
     uint32_t get_number_of_nodes() const;
     uint32_t get_number_of_elements() const;
 
 private:
-	// Internal utility functions
-	uint32_t find_valid_uid() const;
-	bool uid_does_not_exist(uint32_t uid) const;
-	bool alias_does_not_exist(const std::string& alias) const;
+    // Internal utility functions
+    uint32_t find_valid_uid() const;
+    bool uid_does_not_exist(uint32_t uid) const;
+    bool alias_does_not_exist(const std::string& alias) const;
 
-	std::map<uint32_t, std::shared_ptr<Unique_Entity>> entity_table;
-	std::map<std::string, uint32_t> alias_to_id_table;
+    std::map<uint32_t, std::shared_ptr<Unique_Entity>> entity_table;
+    std::map<std::string, uint32_t> alias_to_id_table;
 
-	uint32_t number_of_nodes;
-	uint32_t number_of_elements;
+    uint32_t number_of_nodes;
+    uint32_t number_of_elements;
 };
 
 #endif
