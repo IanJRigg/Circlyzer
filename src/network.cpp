@@ -5,6 +5,8 @@ namespace
     constexpr auto DEFAULT_ALIAS_LENGTH_LIMIT = 25U;
 }
 
+using namespace Circlyzer;
+
 /**********************************************************************************************//**
  * \brief 
  *************************************************************************************************/
@@ -46,6 +48,7 @@ uint32_t Network::create_element(std::unique_ptr<Component> component, const std
 {
     // TODO: don't populate the alias if given an empty alias?
     // TODO: what to do if a duplicate alias is provided?
+    // TODO: what to do if a provided component is null?
 
     auto element = std::make_shared<Element>();
     element->uid = find_valid_uid();

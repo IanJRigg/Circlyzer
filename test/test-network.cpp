@@ -5,6 +5,8 @@
 
 #include <memory>
 
+using namespace Circlyzer;
+
 /**********************************************************************************************//**
  * Assess that a Network is initialized with the node counter and element counter set to 0
  *************************************************************************************************/

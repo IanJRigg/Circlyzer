@@ -1,6 +1,9 @@
 #include <vector>
 #include <complex>
 
+namespace Circlyzer
+{
+
 // Parallel Phasor API
 std::complex<double> simplify_series(const std::vector<std::complex<double>>& elements);
 std::complex<double> simplify_parallel(const std::vector<std::complex<double>>& elements);
@@ -11,3 +14,4 @@ std::complex<float> simplify_series(const std::vector<std::complex<float>>& elem
 std::complex<float> simplify_parallel(const std::vector<std::complex<float>>& elements);
 std::complex<float> simplify_parallel(const std::complex<float>& one, const std::complex<float>& two);
 
+} // namespace Circlyzer

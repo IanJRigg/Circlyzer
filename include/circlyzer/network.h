@@ -10,6 +10,8 @@
 
 #include "component.h"
 
+namespace Circlyzer
+{
 struct Element;
 struct Node;
 
@@ -92,5 +94,7 @@ private:
     uint32_t number_of_nodes;
     uint32_t number_of_elements;
 };
+
+} // Namespace Circlyzer
 
 #endif

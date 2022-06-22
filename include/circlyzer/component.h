@@ -3,6 +3,9 @@
 
 #include <complex>
 
+namespace Circlyzer
+{
+
 enum class Component_Type : uint32_t
 {
     Resistor,
@@ -69,5 +72,7 @@ struct Voltage_Source : Component
 {
     std::complex<double> voltage;
 };
+
+} // namespace Circlyzer
 
 #endif
