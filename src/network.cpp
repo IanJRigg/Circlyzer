@@ -1,5 +1,10 @@
 #include "circlyzer/network.h"
 
+namespace
+{
+    constexpr auto DEFAULT_ALIAS_LENGTH_LIMIT = 25U;
+}
+
 /**********************************************************************************************//**
  * \brief 
  *************************************************************************************************/
@@ -17,15 +22,15 @@ Network::Network() :
  *************************************************************************************************/
 uint32_t Network::create_node(const std::string& alias)
 {
-    // TODO: don't populate the alias if given an empty alias
-    // TODO: what to do if a duplicate alias is provided
+    // TODO: don't populate the alias if given an empty alias?
+    // TODO: what to do if a duplicate alias is provided?
 
-	auto node = std::make_shared<Node>();
+    auto node = std::make_shared<Node>();
     node->uid = find_valid_uid();
-	node->alias = alias;
-	node->type = Entity_Type::Node;
+    node->alias = alias;
+    node->type = Entity_Type::Node;
 
-	entity_table.insert({ node->uid, node });
+    entity_table.insert({ node->uid, node });
     alias_to_id_table.insert({ alias, node->uid });
     ++number_of_nodes;
 
@@ -39,8 +44,8 @@ uint32_t Network::create_node(const std::string& alias)
  *************************************************************************************************/
 uint32_t Network::create_element(std::unique_ptr<Component> component, const std::string& alias)
 {
-    // TODO: don't populate the alias if given an empty alias
-    // TODO: what to do if a duplicate alias is provided
+    // TODO: don't populate the alias if given an empty alias?
+    // TODO: what to do if a duplicate alias is provided?
 
     auto element = std::make_shared<Element>();
     element->uid = find_valid_uid();
@@ -50,7 +55,7 @@ uint32_t Network::create_element(std::unique_ptr<Component> component, const std
 
     entity_table.insert({ element->uid, element });
     alias_to_id_table.insert({ alias, element->uid });
-    
+
     ++number_of_elements;
 
     return element->uid;
@@ -129,7 +134,7 @@ void Network::create_connection_between(const std::string& first_alias,
  * \param second_entity 
  *************************************************************************************************/
 void Network::delete_connection_between(const std::string& first_alias,
-	                                    const std::string& second_alias)
+                                        const std::string& second_alias)
 {
 
 }
@@ -259,16 +264,16 @@ uint32_t Network::get_number_of_elements() const
  *************************************************************************************************/
 uint32_t Network::find_valid_uid() const
 {
-	uint32_t attempted_id = 0U;
-	for(auto it = entity_table.cbegin(); it != entity_table.cend(); ++it)
-	{
+    uint32_t attempted_id = 0U;
+    for(auto it = entity_table.cbegin(); it != entity_table.cend(); ++it)
+    {
         if(it->first < attempted_id)
         {
-        	break;
+            break;
         }
 
         ++attempted_id;
-	}
+    }
 
     return attempted_id;
 }
