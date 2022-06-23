@@ -121,7 +121,7 @@ const Component& Network::get_component(const uint32_t uid) const
         throw Wrong_Entity_Type_Exception();
     }
 
-    const auto element = dynamic_cast<const Element&>(*entity_ptr);
+    const auto& element = dynamic_cast<const Element&>(*entity_ptr);
 
     return *(element.component);
 }
@@ -145,9 +145,61 @@ const Component& Network::get_component(const std::string& alias) const
  * \param first_entity
  * \param second_entity 
  *************************************************************************************************/
-void Network::create_connection_between(const uint32_t first_uid, const uint32_t second_uid)
+void Network::create_connection_between(const uint32_t node_uid, const uint32_t element_uid)
 {
+    // Make sure both UIDs actually exist
+    if(uid_does_not_exist(node_uid) || uid_does_not_exist(element_uid))
+    {
+        return;
+    }
 
+    // Self references are forbidden
+    if(node_uid == element_uid)
+    {
+        return;
+    }
+
+    // Make sure that the two entities are a node and a component
+    std::weak_ptr<Unique_Entity> node_weak_ptr = entity_table.at(node_uid);
+    std::weak_ptr<Unique_Entity> element_weak_ptr = entity_table.at(element_uid);
+
+    if(node_weak_ptr.expired() || element_weak_ptr.expired())
+    {
+        assert((false) && "Internal pointer index has been corrupted!");
+    }
+
+    auto node_ptr = node_weak_ptr.lock();
+    auto element_ptr = node_weak_ptr.lock();
+
+    if((node_ptr->type != Entity_Type::Node) &&
+       (element_ptr->type != Entity_Type::Element))
+    {
+        // Node and Element weren't provided
+        return;
+    }
+
+    auto& node = dynamic_cast<Node&>(*node_ptr);
+    auto& element = dynamic_cast<Element&>(*element_ptr);
+
+    // Assign the connection to the first open terminal
+    if(element.nodes.front().expired())
+    {
+        element.nodes.at(0) = dynamic_pointer_cast<Node>(node_ptr);
+    }
+    else if(element.nodes.back().expired())
+    {
+        element.nodes.at(1) = dynamic_pointer_cast<Node>(node_ptr);
+    }
+    else
+    {
+        // No place for the new connection
+        return;
+    }
+
+    // node.elements.emplace_back(element_weak_ptr);
+
+    // Return success
+    return;
 }
 
 /**********************************************************************************************//**
@@ -155,9 +207,41 @@ void Network::create_connection_between(const uint32_t first_uid, const uint32_t
  * \param first_entity
  * \param second_entity 
  *************************************************************************************************/
-void Network::delete_connection_between(const uint32_t first_uid, const uint32_t second_uid)
+void Network::delete_connection_between(const uint32_t node_uid, const uint32_t element_uid)
 {
+    // Make sure both UIDs actually exist
+    if(uid_does_not_exist(node_uid) || uid_does_not_exist(element_uid))
+    {
+        return;
+    }
 
+    // Self references are forbidden
+    if(node_uid == element_uid)
+    {
+        return;
+    }
+
+    // Make sure that the two entities are a node and a component
+    std::weak_ptr<Unique_Entity> node_weak_ptr = entity_table.at(node_uid);
+    std::weak_ptr<Unique_Entity> element_weak_ptr = entity_table.at(element_uid);
+
+    if(node_weak_ptr.expired() || element_weak_ptr.expired())
+    {
+        assert((false) && "Internal pointer index has been corrupted!");
+    }
+
+    auto node_ptr = node_weak_ptr.lock();
+    auto element_ptr = node_weak_ptr.lock();
+
+    if((node_ptr->type != Entity_Type::Node) &&
+       (element_ptr->type != Entity_Type::Element))
+    {
+        // Node and Element weren't provided
+        return;
+    }
+
+    auto& node = dynamic_cast<Node&>(*node_ptr);
+    auto& element = dynamic_cast<Element&>(*element_ptr);
 }
 
 /**********************************************************************************************//**
@@ -165,10 +249,16 @@ void Network::delete_connection_between(const uint32_t first_uid, const uint32_t
  * \param first_entity
  * \param second_entity 
  *************************************************************************************************/
-void Network::create_connection_between(const std::string& first_alias,
-                                        const std::string& second_alias)
+void Network::create_connection_between(const std::string& node_alias,
+                                        const std::string& element_alias)
 {
+    if(alias_does_not_exist(node_alias) || alias_does_not_exist(element_alias))
+    {
+        return;
+    }
 
+    return create_connection_between(alias_to_id_table.at(node_alias),
+                                     alias_to_id_table.at(element_alias));
 }
 
 /**********************************************************************************************//**
@@ -176,10 +266,16 @@ void Network::create_connection_between(const std::string& first_alias,
  * \param first_entity
  * \param second_entity 
  *************************************************************************************************/
-void Network::delete_connection_between(const std::string& first_alias,
-                                        const std::string& second_alias)
+void Network::delete_connection_between(const std::string& node_alias,
+                                        const std::string& element_alias)
 {
+    if(alias_does_not_exist(node_alias) || alias_does_not_exist(element_alias))
+    {
+        return;
+    }
 
+    return create_connection_between(alias_to_id_table.at(node_alias),
+                                     alias_to_id_table.at(element_alias));
 }
 
 /**********************************************************************************************//**

@@ -30,19 +30,19 @@ struct Unique_Entity
     Entity_Type type;
 };
 
-struct Element : Unique_Entity
+struct Element : public Unique_Entity
 {
     virtual ~Element() = default;
 
-    std::shared_ptr<Component> component;
-    std::array<std::weak_ptr<Node>, 2> terminals;
+    std::unique_ptr<Component> component;
+    std::array<std::weak_ptr<Node>, 2> nodes;
 };
 
-struct Node : Unique_Entity
+struct Node : public Unique_Entity
 {
     virtual ~Node() = default;
 
-    std::vector<std::weak_ptr<Element>> elements;
+    std::map<uint32_t, std::weak_ptr<Element>> uid_to_elements;
 };
 
 class Network
@@ -60,14 +60,14 @@ public:
     const Component& get_component(const std::string& alias) const;
 
     // Update Functions
-    void create_connection_between(uint32_t first_uid, uint32_t second_uid);
-    void delete_connection_between(uint32_t first_uid, uint32_t second_uid);
+    void create_connection_between(uint32_t node_uid, uint32_t element_uid);
+    void delete_connection_between(uint32_t node_uid, uint32_t element_uid);
 
-    void create_connection_between(const std::string& first_alias, 
-                                   const std::string& second_alias);
+    void create_connection_between(const std::string& node_alias, 
+                                   const std::string& element_alias);
 
-    void delete_connection_between(const std::string& first_alias,
-                                   const std::string& second_alias);
+    void delete_connection_between(const std::string& node_alias,
+                                   const std::string& element_alias);
 
     void update_alias(uint32_t uid, const std::string& new_alias);
     void update_alias(const std::string& alias, const std::string& new_alias);
