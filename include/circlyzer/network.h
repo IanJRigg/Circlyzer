@@ -11,12 +11,12 @@
 
 namespace Circlyzer
 {
-struct Element;
+struct Branch;
 struct Node;
 
 enum class Entity_Type
 {
-    Element,
+    Branch,
     Node
 };
 
@@ -29,9 +29,9 @@ struct Unique_Entity
     Entity_Type type;
 };
 
-struct Element : public Unique_Entity
+struct Branch : public Unique_Entity
 {
-    virtual ~Element() = default;
+    virtual ~Branch() = default;
 
     std::unique_ptr<Component> component;
     std::vector<uint32_t> nodes;
@@ -41,7 +41,7 @@ struct Node : public Unique_Entity
 {
     virtual ~Node() = default;
 
-    std::set<uint32_t> elements;
+    std::set<uint32_t> branches;
 };
 
 class Network
@@ -52,21 +52,21 @@ public:
 
     // Create Functions
     uint32_t create_node(const std::string& alias="");
-    uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias="");
+    uint32_t create_branch(std::unique_ptr<Component> component, const std::string& alias="");
 
     // Read Functions
     const Component& get_component(uint32_t uid) const;
     const Component& get_component(const std::string& alias) const;
 
     // Update Functions
-    void create_connection_between(uint32_t node_uid, uint32_t element_uid);
-    void delete_connection_between(uint32_t node_uid, uint32_t element_uid);
+    void create_connection_between(uint32_t node_uid, uint32_t branch_uid);
+    void delete_connection_between(uint32_t node_uid, uint32_t branch_uid);
 
     void create_connection_between(const std::string& node_alias, 
-                                   const std::string& element_alias);
+                                   const std::string& branch_alias);
 
     void delete_connection_between(const std::string& node_alias,
-                                   const std::string& element_alias);
+                                   const std::string& branch_alias);
 
     void update_alias(uint32_t uid, const std::string& new_alias);
     void update_alias(const std::string& alias, const std::string& new_alias);
@@ -80,7 +80,7 @@ public:
     uint32_t get_number_of_entities() const;
     uint32_t get_number_of_aliases() const;
     uint32_t get_number_of_nodes() const;
-    uint32_t get_number_of_elements() const;
+    uint32_t get_number_of_branches() const;
 
 private:
     // Internal utility functions
@@ -92,7 +92,8 @@ private:
     std::map<std::string, uint32_t> alias_to_id_table;
 
     uint32_t number_of_nodes;
-    uint32_t number_of_elements;
+    uint32_t number_of_branches;
+
 };
 
 } // Namespace Circlyzer

@@ -22,7 +22,7 @@ namespace
 }
 
 /**********************************************************************************************//**
- * Assess that a Network is initialized with the node counter and element counter set to 0
+ * Assess that a Network is initialized with the node counter and branch counter set to 0
  *************************************************************************************************/
 TEST(Network, Constructor)
 {
@@ -32,7 +32,7 @@ TEST(Network, Constructor)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 }
 
 /**********************************************************************************************//**
@@ -66,7 +66,7 @@ TEST(Network, NodeCreation)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 
     auto first_uid = network.create_node();
 
@@ -74,7 +74,7 @@ TEST(Network, NodeCreation)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
     EXPECT_EQ(first_uid, 0);
 
     auto second_uid = network.create_node();
@@ -83,40 +83,40 @@ TEST(Network, NodeCreation)
     EXPECT_EQ(network.get_number_of_entities(), 2);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 2);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
     EXPECT_EQ(second_uid, 1);
 }
 
 /**********************************************************************************************//**
  * Assess that an alias longer than the default length throws an exception
  *************************************************************************************************/
-TEST(Network, ElementCreationWithTooLongAlias)
+TEST(Network, BranchCreationWithTooLongAlias)
 {
     Network network;
     auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
-    EXPECT_THROW(network.create_element(std::move(resistor), TOO_LONG_ALIAS), 
+    EXPECT_THROW(network.create_branch(std::move(resistor), TOO_LONG_ALIAS), 
                  Invalid_Alias_Exception);
 }
 
 /**********************************************************************************************//**
  * Assess that duplicate aliases throw an exception
  *************************************************************************************************/
-TEST(Network, ElementCreationWithDuplicateAlias)
+TEST(Network, BranchCreationWithDuplicateAlias)
 {
     Network network;
     auto resistor_one = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
-    network.create_element(std::move(resistor_one), VALID_ALIAS_ONE);
+    network.create_branch(std::move(resistor_one), VALID_ALIAS_ONE);
 
     auto resistor_two = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
-    EXPECT_THROW(network.create_element(std::move(resistor_two), VALID_ALIAS_ONE),
+    EXPECT_THROW(network.create_branch(std::move(resistor_two), VALID_ALIAS_ONE),
                  Duplicate_Alias_Exception);
 }
 
 /**********************************************************************************************//**
- * Assess that elements get created, UIDs get assigned as expected and the element counter 
+ * Assess that branches get created, UIDs get assigned as expected and the branch counter 
  * increments accordingly
  *************************************************************************************************/
-TEST(Network, ElementCreation)
+TEST(Network, BranchCreation)
 {
     Network network;
 
@@ -124,10 +124,10 @@ TEST(Network, ElementCreation)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 
     auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
-    auto first_uid = network.create_element(std::move(resistor));
+    auto first_uid = network.create_branch(std::move(resistor));
 
     // Make sure that ownership has been correctly transfered away from resistor
     EXPECT_EQ(resistor.get(), nullptr);
@@ -136,7 +136,7 @@ TEST(Network, ElementCreation)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 1);
+    EXPECT_EQ(network.get_number_of_branches(), 1);
     EXPECT_EQ(first_uid, 0);
 }
 
@@ -146,7 +146,7 @@ TEST(Network, ElementCreation)
 TEST(Network, AccessComponentWithInvalidUid)
 {
     Network network;
-    EXPECT_THROW(network.get_component(INVALID_UID), Non_Existant_UID_Exception);
+    EXPECT_THROW(network.get_component(INVALID_UID_ONE), Non_Existant_UID_Exception);
 }
 
 /**********************************************************************************************//**
@@ -167,7 +167,7 @@ TEST(Network, AccessComponent)
 {
     Network network;
     auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
-    auto first_uid = network.create_element(std::move(resistor));
+    auto first_uid = network.create_branch(std::move(resistor));
     const auto& component = network.get_component(first_uid);
     EXPECT_EQ(component.type, Component_Type::Resistor);
 
@@ -202,7 +202,7 @@ TEST(Network, AccessComponentViaAlias)
 {
     Network network;
     auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
-    auto first_uid = network.create_element(std::move(resistor), VALID_ALIAS_ONE);
+    auto first_uid = network.create_branch(std::move(resistor), VALID_ALIAS_ONE);
     const auto& component = network.get_component(VALID_ALIAS_ONE);
 
     EXPECT_EQ(component.type, Component_Type::Resistor);
@@ -211,10 +211,16 @@ TEST(Network, AccessComponentViaAlias)
     EXPECT_EQ(resistor_reference.resistance, DEFAULT_RESISTANCE);
 }
 
+/**********************************************************************************************//**
+ * 
+ *************************************************************************************************/
 TEST(Network, CreateConnectionWhenUIDsDontExist)
 {
     Network network;
 
+    network.create_connection_between(INVALID_UID_ONE, INVLAID_UID_TWO);
+
+    auto first_uid = network.create_node(VALID_ALIAS_ONE);
 }
 
 /**********************************************************************************************//**
@@ -228,16 +234,16 @@ TEST(Network, DestroyEntityWhenNoneExist)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 
     // Destroy a fake node
-    network.destroy_entity(INVALID_UID);
+    network.destroy_entity(INVALID_UID_ONE);
 
     // Check entity counts
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 }
 
 /**********************************************************************************************//**
@@ -252,7 +258,7 @@ TEST(Network, DestroyEntityToDestroyNode)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 
     // Destroy the node. This should clear all the entity counts
     network.destroy_entity(node_uid);
@@ -261,32 +267,32 @@ TEST(Network, DestroyEntityToDestroyNode)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 }
 
 /**********************************************************************************************//**
- * Assess that you destroying an element through destroy_entity works
+ * Assess that you destroying an branch through destroy_entity works
  *************************************************************************************************/
-TEST(Network, DestroyEntityToDestroyElement)
+TEST(Network, DestroyEntityToDestroyBranch)
 {
     Network network;
     auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
-    auto element_uid = network.create_element(std::move(resistor));
+    auto branch_uid = network.create_branch(std::move(resistor));
 
     // Ensure that the counts are correct prrior to calling the deletion logic
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 1);
+    EXPECT_EQ(network.get_number_of_branches(), 1);
 
-    // Destroy the element. This should clear all the entity counts
-    network.destroy_entity(element_uid);
+    // Destroy the branch. This should clear all the entity counts
+    network.destroy_entity(branch_uid);
 
     // Check that the entity counts remain unchanged
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 }
 
 /**********************************************************************************************//**
@@ -301,7 +307,7 @@ TEST(Network, DestroyEntityViaAliasWhenNoneExist)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 1);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 
     // Destroy a fake node
     network.destroy_entity(INVALID_ALIAS);
@@ -310,7 +316,7 @@ TEST(Network, DestroyEntityViaAliasWhenNoneExist)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 1);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 }
 
 /**********************************************************************************************//**
@@ -325,7 +331,7 @@ TEST(Network, DestroyEntityViaAliasToDestroyNode)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 1);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 
     // Destroy the node. This should clear all the entity counts
     network.destroy_entity(VALID_ALIAS_ONE);
@@ -334,30 +340,30 @@ TEST(Network, DestroyEntityViaAliasToDestroyNode)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 }
 
 /**********************************************************************************************//**
- * Assess that you destroying an element through destroy_entity works
+ * Assess that you destroying an branch through destroy_entity works
  *************************************************************************************************/
-TEST(Network, DestroyEntityViaAliasToDestroyElement)
+TEST(Network, DestroyEntityViaAliasToDestroyBranch)
 {
     Network network;
     auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
-    auto element_uid = network.create_element(std::move(resistor), VALID_ALIAS_ONE);
+    auto branch_uid = network.create_branch(std::move(resistor), VALID_ALIAS_ONE);
 
     // Ensure that the counts are correct prrior to calling the deletion logic
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 1);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 1);
+    EXPECT_EQ(network.get_number_of_branches(), 1);
 
-    // Destroy the element. This should clear all the entity counts
+    // Destroy the branch. This should clear all the entity counts
     network.destroy_entity(VALID_ALIAS_ONE);
 
     // Check that the entity counts remain unchanged
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_branches(), 0);
 }
