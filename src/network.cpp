@@ -1,6 +1,10 @@
 #include "circlyzer/network.h"
 #include "circlyzer/exceptions.h"
 
+// uncomment to disable assert()
+// #define NDEBUG
+#include <cassert>
+
 namespace
 {
     constexpr auto DEFAULT_ALIAS_LENGTH_LIMIT = 25U;
@@ -180,84 +184,82 @@ void Network::delete_connection_between(const std::string& first_alias,
 
 /**********************************************************************************************//**
  * \brief 
- * \param uid 
+ * \param uid
+ * \param new_alias 
  *************************************************************************************************/
-void Network::destroy_node(const uint32_t uid)
+void Network::update_alias(const uint32_t uid, const std::string& new_alias)
 {
     if(uid_does_not_exist(uid))
     {
         return;
     }
 
-    // TODO: Merge the Node and Element paths into one set of functions
-    auto entity_ptr = entity_table.at(uid);
-    if(entity_ptr->type != Entity_Type::Node)
+    // TODO: Update the alias
+}
+
+/**********************************************************************************************//**
+ * \brief 
+ * \param alias
+ * \param new_alias 
+ *************************************************************************************************/
+void Network::update_alias(const std::string& alias, const std::string& new_alias)
+{
+    if(alias_does_not_exist(alias))
     {
         return;
     }
 
-    // Retrieve the alias prior to deletion. This is so we can update alias_to_uid correctly
-    const auto alias = entity_ptr->alias;
-
-    // Cast down to the node object to ensure all destructors get called
-    auto node_ptr = dynamic_pointer_cast<Element>(entity_ptr);
-    node_ptr.reset();
-
-    entity_table.erase(uid);
-    alias_to_id_table.erase(alias);
-
-    --number_of_nodes;
+    update_alias(alias_to_id_table.at(alias), new_alias);
 }
 
 /**********************************************************************************************//**
  * \brief 
  * \param uid 
  *************************************************************************************************/
-void Network::destroy_element(const uint32_t uid)
+void Network::destroy_entity(const uint32_t uid)
 {
     if(uid_does_not_exist(uid))
     {
         return;
     }
 
-    // TODO: Merge the Node and Element paths into one set of functions
     auto entity_ptr = entity_table.at(uid);
-    if(entity_ptr->type != Entity_Type::Element)
+    const auto alias = entity_ptr->alias;
+    const auto type = entity_ptr->type;
+
+    if(type == Entity_Type::Node)
+    {
+        auto node_ptr = dynamic_pointer_cast<Node>(entity_ptr);
+        node_ptr.reset();
+        --number_of_nodes;
+    }
+    else if(type == Entity_Type::Element)
+    {
+        auto element_ptr = dynamic_pointer_cast<Element>(entity_ptr);
+        element_ptr.reset();
+        --number_of_elements;
+    }
+    else
+    {
+        assert((false) && "Invalid entity type discovered on destroy");
+    }
+
+    entity_table.erase(uid);
+    alias_to_id_table.erase(alias);
+}
+
+/**********************************************************************************************//**
+ * \brief 
+ * \param alias 
+ *************************************************************************************************/
+void Network::destroy_entity(const std::string& alias)
+{
+    if(alias_does_not_exist(alias))
     {
         return;
     }
 
-    // Retrieve the alias prior to deletion. This is so we can update alias_to_uid correctly
-    const auto alias = entity_ptr->alias;
-
-    // Cast down to the element object to ensure all destructors get called
-    auto element_ptr = dynamic_pointer_cast<Element>(entity_ptr);
-    element_ptr.reset();
-
-    entity_table.erase(uid);
-    alias_to_id_table.erase(alias);
-
-    --number_of_elements;
-}
-
-/**********************************************************************************************//**
- * \brief 
- * \param alias 
- *************************************************************************************************/
-void Network::destroy_node(const std::string& alias)
-{
-    alias_does_not_exist(alias);
-    destroy_node(alias_to_id_table.at(alias));
-}
-
-/**********************************************************************************************//**
- * \brief 
- * \param alias 
- *************************************************************************************************/
-void Network::destroy_element(const std::string alias)
-{
-    alias_does_not_exist(alias);
-    destroy_element(alias_to_id_table.at(alias));
+    destroy_entity(alias_to_id_table.at(alias));
 }
 
 /**********************************************************************************************//**

@@ -16,6 +16,7 @@ namespace
 
     const std::string VALID_ALIAS_ONE = "ONE";
     const std::string VALID_ALIAS_TWO = "TWO";
+    const std::string INVALID_ALIAS = "I'm an invalid alias!";
     const std::string TOO_LONG_ALIAS = "This is an alias that is absolutely longer than 25 chars";
 }
 
@@ -212,7 +213,7 @@ TEST(Network, AccessComponentViaAlias)
 /**********************************************************************************************//**
  * Assess that destroying a node that doesn't exist changes nothing
  *************************************************************************************************/
-TEST(Network, DestroyNodeWhenNoneExist)
+TEST(Network, DestroyEntityWhenNoneExist)
 {
     Network network;
 
@@ -223,9 +224,131 @@ TEST(Network, DestroyNodeWhenNoneExist)
     EXPECT_EQ(network.get_number_of_elements(), 0);
 
     // Destroy a fake node
-    network.destroy_node(INVALID_UID);
+    network.destroy_entity(INVALID_UID);
 
     // Check entity counts
+    EXPECT_EQ(network.get_number_of_entities(), 0);
+    EXPECT_EQ(network.get_number_of_aliases(), 0);
+    EXPECT_EQ(network.get_number_of_nodes(), 0);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+}
+
+/**********************************************************************************************//**
+ * Assess that you destroying a node through destroy_entity works
+ *************************************************************************************************/
+TEST(Network, DestroyEntityToDestroyNode)
+{
+    Network network;
+    auto node_uid = network.create_node();
+
+    // Ensure that the counts are correct prrior to calling the deletion logic
+    EXPECT_EQ(network.get_number_of_entities(), 1);
+    EXPECT_EQ(network.get_number_of_aliases(), 0);
+    EXPECT_EQ(network.get_number_of_nodes(), 1);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+
+    // Destroy the node. This should clear all the entity counts
+    network.destroy_entity(node_uid);
+
+    // Check that the entity counts remain unchanged
+    EXPECT_EQ(network.get_number_of_entities(), 0);
+    EXPECT_EQ(network.get_number_of_aliases(), 0);
+    EXPECT_EQ(network.get_number_of_nodes(), 0);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+}
+
+/**********************************************************************************************//**
+ * Assess that you destroying an element through destroy_entity works
+ *************************************************************************************************/
+TEST(Network, DestroyEntityToDestroyElement)
+{
+    Network network;
+    auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
+    auto element_uid = network.create_element(std::move(resistor));
+
+    // Ensure that the counts are correct prrior to calling the deletion logic
+    EXPECT_EQ(network.get_number_of_entities(), 1);
+    EXPECT_EQ(network.get_number_of_aliases(), 0);
+    EXPECT_EQ(network.get_number_of_nodes(), 0);
+    EXPECT_EQ(network.get_number_of_elements(), 1);
+
+    // Destroy the element. This should clear all the entity counts
+    network.destroy_entity(element_uid);
+
+    // Check that the entity counts remain unchanged
+    EXPECT_EQ(network.get_number_of_entities(), 0);
+    EXPECT_EQ(network.get_number_of_aliases(), 0);
+    EXPECT_EQ(network.get_number_of_nodes(), 0);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+}
+
+/**********************************************************************************************//**
+ * Assess that destroying a node that doesn't exist changes nothing
+ *************************************************************************************************/
+TEST(Network, DestroyEntityViaAliasWhenNoneExist)
+{
+    Network network;
+    auto node_uid = network.create_node(VALID_ALIAS_ONE);
+
+    // Check entity counts
+    EXPECT_EQ(network.get_number_of_entities(), 1);
+    EXPECT_EQ(network.get_number_of_aliases(), 1);
+    EXPECT_EQ(network.get_number_of_nodes(), 1);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+
+    // Destroy a fake node
+    network.destroy_entity(INVALID_ALIAS);
+
+    // Check that entity counts haven't changed
+    EXPECT_EQ(network.get_number_of_entities(), 1);
+    EXPECT_EQ(network.get_number_of_aliases(), 1);
+    EXPECT_EQ(network.get_number_of_nodes(), 1);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+}
+
+/**********************************************************************************************//**
+ * Assess that you destroying a node through destroy_entity works
+ *************************************************************************************************/
+TEST(Network, DestroyEntityViaAliasToDestroyNode)
+{
+    Network network;
+    auto node_uid = network.create_node(VALID_ALIAS_ONE);
+
+    // Ensure that the counts are correct prrior to calling the deletion logic
+    EXPECT_EQ(network.get_number_of_entities(), 1);
+    EXPECT_EQ(network.get_number_of_aliases(), 1);
+    EXPECT_EQ(network.get_number_of_nodes(), 1);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+
+    // Destroy the node. This should clear all the entity counts
+    network.destroy_entity(VALID_ALIAS_ONE);
+
+    // Check that the entity counts remain unchanged
+    EXPECT_EQ(network.get_number_of_entities(), 0);
+    EXPECT_EQ(network.get_number_of_aliases(), 0);
+    EXPECT_EQ(network.get_number_of_nodes(), 0);
+    EXPECT_EQ(network.get_number_of_elements(), 0);
+}
+
+/**********************************************************************************************//**
+ * Assess that you destroying an element through destroy_entity works
+ *************************************************************************************************/
+TEST(Network, DestroyEntityViaAliasToDestroyElement)
+{
+    Network network;
+    auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
+    auto element_uid = network.create_element(std::move(resistor), VALID_ALIAS_ONE);
+
+    // Ensure that the counts are correct prrior to calling the deletion logic
+    EXPECT_EQ(network.get_number_of_entities(), 1);
+    EXPECT_EQ(network.get_number_of_aliases(), 1);
+    EXPECT_EQ(network.get_number_of_nodes(), 0);
+    EXPECT_EQ(network.get_number_of_elements(), 1);
+
+    // Destroy the element. This should clear all the entity counts
+    network.destroy_entity(VALID_ALIAS_ONE);
+
+    // Check that the entity counts remain unchanged
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);

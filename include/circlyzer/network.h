@@ -69,12 +69,13 @@ public:
     void delete_connection_between(const std::string& first_alias,
                                    const std::string& second_alias);
 
-    // Destroy Functions
-    void destroy_node(uint32_t uid);
-    void destroy_element(uint32_t uid);
+    void update_alias(uint32_t uid, const std::string& new_alias);
+    void update_alias(const std::string& alias, const std::string& new_alias);
 
-    void destroy_node(const std::string& alias);
-    void destroy_element(const std::string alias);
+    // TODO: add logic to update components
+
+    void destroy_entity(uint32_t uid);
+    void destroy_entity(const std::string& alias);
 
     // External Utility Functions
     uint32_t get_number_of_entities() const;
