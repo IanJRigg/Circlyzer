@@ -16,3 +16,6 @@ Development Path:
 
 Nice to Haves:
 1. Conversion to the Boost Graph. This would allow for visualizations of the network via the dot visualizer.
+
+Development Notes:
+- I've split the project into two branches. One branch holds what will be for now, the legacy pointer implementation of the network. The other branch will hold a new implementation that runs exclusively on UIDs in place of the pointers.
