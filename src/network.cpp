@@ -1,7 +1,7 @@
 #include "circlyzer/network.h"
 #include "circlyzer/exceptions.h"
 
-// uncomment to disable assert()
+// Uncomment to disable assert()
 // #define NDEBUG
 #include <cassert>
 
@@ -42,321 +42,318 @@ uint32_t Network::create_node(const std::string& alias)
     }
 
     // Create the node
-    auto node = std::make_shared<Node>();
-    node->uid = find_valid_uid();
-    node->alias = alias;
-    node->type = Entity_Type::Node;
+    Node node(find_valid_uid(), alias, Entity_Type::Node);
 
     // Insert all non-empty string aliases once they've been cleared for insertion
     if(alias.size() > 0)
     {
-        alias_to_id_table.insert({ alias, node->uid });
+        alias_to_id_table.insert({ alias, node.uid });
     }
 
     // Insert the element
-    entity_table.insert({ node->uid, node });
+    entity_table.insert({ node.uid, node });
     ++number_of_nodes;
 
-    return node->uid;
+    return node.uid;
 }
 
-/**********************************************************************************************//**
- * \brief 
- * \param component
- * \param alias
- *************************************************************************************************/
-uint32_t Network::create_element(std::unique_ptr<Component> component, const std::string& alias)
-{
-    if(component == nullptr)
-    {
-        throw Null_Component_Exception();
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param component
+//  * \param alias
+//  *************************************************************************************************/
+// uint32_t Network::create_element(std::unique_ptr<Component> component, const std::string& alias)
+// {
+//     if(component == nullptr)
+//     {
+//         throw Null_Component_Exception();
+//     }
 
-    // Size check
-    if(alias.size() >= DEFAULT_ALIAS_LENGTH_LIMIT)
-    {
-        throw Invalid_Alias_Exception();
-    }
+//     // Size check
+//     if(alias.size() >= DEFAULT_ALIAS_LENGTH_LIMIT)
+//     {
+//         throw Invalid_Alias_Exception();
+//     }
 
-    // Duplicate check
-    if(alias_to_id_table.find(alias) != alias_to_id_table.end())
-    {
-        throw Duplicate_Alias_Exception();
-    }
+//     // Duplicate check
+//     if(alias_to_id_table.find(alias) != alias_to_id_table.end())
+//     {
+//         throw Duplicate_Alias_Exception();
+//     }
 
-    // Create the element
-    auto element = std::make_shared<Element>();
-    element->uid = find_valid_uid();
-    element->alias = alias;
-    element->type = Entity_Type::Element;
-    element->component = std::move(component);
+//     // Create the element
+//     auto element = std::make_shared<Element>();
+//     element->uid = find_valid_uid();
+//     element->alias = alias;
+//     element->type = Entity_Type::Element;
+//     element->component = std::move(component);
 
-    // Insert all non-empty string aliases once they've been cleared for insertion
-    if(alias.size() > 0)
-    {
-        alias_to_id_table.insert({ alias, element->uid });
-    }
+//     // Insert all non-empty string aliases once they've been cleared for insertion
+//     if(alias.size() > 0)
+//     {
+//         alias_to_id_table.insert({ alias, element->uid });
+//     }
 
-    // Insert the element
-    entity_table.insert({ element->uid, element });
-    ++number_of_elements;
+//     // Insert the element
+//     entity_table.insert({ element->uid, element });
+//     ++number_of_elements;
 
-    return element->uid;
-}
+//     return element->uid;
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param uid 
- *************************************************************************************************/
-const Component& Network::get_component(const uint32_t uid) const
-{
-    if(uid_does_not_exist(uid))
-    {
-        throw Non_Existant_UID_Exception();
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param uid 
+//  *************************************************************************************************/
+// const Component& Network::get_component(const uint32_t uid) const
+// {
+//     if(uid_does_not_exist(uid))
+//     {
+//         throw Non_Existant_UID_Exception();
+//     }
 
-    const auto entity_ptr = entity_table.at(uid);
-    if(entity_ptr->type != Entity_Type::Element)
-    {
-        throw Wrong_Entity_Type_Exception();
-    }
+//     const auto entity_ptr = entity_table.at(uid);
+//     if(entity_ptr->type != Entity_Type::Element)
+//     {
+//         throw Wrong_Entity_Type_Exception();
+//     }
 
-    const auto& element = dynamic_cast<const Element&>(*entity_ptr);
+//     const auto& element = dynamic_cast<const Element&>(*entity_ptr);
 
-    return *(element.component);
-}
+//     return *(element.component);
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param alias 
- *************************************************************************************************/
-const Component& Network::get_component(const std::string& alias) const
-{
-    if(alias_does_not_exist(alias))
-    {
-        throw Non_Existant_Alias_Exception();
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param alias 
+//  *************************************************************************************************/
+// const Component& Network::get_component(const std::string& alias) const
+// {
+//     if(alias_does_not_exist(alias))
+//     {
+//         throw Non_Existant_Alias_Exception();
+//     }
 
-    return get_component(alias_to_id_table.at(alias));
-}
+//     return get_component(alias_to_id_table.at(alias));
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param first_entity
- * \param second_entity 
- *************************************************************************************************/
-void Network::create_connection_between(const uint32_t node_uid, const uint32_t element_uid)
-{
-    // Make sure both UIDs actually exist
-    if(uid_does_not_exist(node_uid) || uid_does_not_exist(element_uid))
-    {
-        return;
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param first_entity
+//  * \param second_entity 
+//  *************************************************************************************************/
+// void Network::create_connection_between(const uint32_t node_uid, const uint32_t element_uid)
+// {
+//     // Make sure both UIDs actually exist
+//     if(uid_does_not_exist(node_uid) || uid_does_not_exist(element_uid))
+//     {
+//         return;
+//     }
 
-    // Self references are forbidden
-    if(node_uid == element_uid)
-    {
-        return;
-    }
+//     // Self references are forbidden
+//     if(node_uid == element_uid)
+//     {
+//         return;
+//     }
 
-    // Make sure that the two entities are a node and a component
-    std::weak_ptr<Unique_Entity> node_weak_ptr = entity_table.at(node_uid);
-    std::weak_ptr<Unique_Entity> element_weak_ptr = entity_table.at(element_uid);
+//     // Make sure that the two entities are a node and a component
+//     std::weak_ptr<Unique_Entity> node_weak_ptr = entity_table.at(node_uid);
+//     std::weak_ptr<Unique_Entity> element_weak_ptr = entity_table.at(element_uid);
 
-    if(node_weak_ptr.expired() || element_weak_ptr.expired())
-    {
-        assert((false) && "Internal pointer index has been corrupted!");
-    }
+//     if(node_weak_ptr.expired() || element_weak_ptr.expired())
+//     {
+//         assert((false) && "Internal pointer index has been corrupted!");
+//     }
 
-    auto node_ptr = node_weak_ptr.lock();
-    auto element_ptr = node_weak_ptr.lock();
+//     auto node_ptr = node_weak_ptr.lock();
+//     auto element_ptr = node_weak_ptr.lock();
 
-    if((node_ptr->type != Entity_Type::Node) &&
-       (element_ptr->type != Entity_Type::Element))
-    {
-        // Node and Element weren't provided
-        return;
-    }
+//     if((node_ptr->type != Entity_Type::Node) &&
+//        (element_ptr->type != Entity_Type::Element))
+//     {
+//         // Node and Element weren't provided
+//         return;
+//     }
 
-    auto& node = dynamic_cast<Node&>(*node_ptr);
-    auto& element = dynamic_cast<Element&>(*element_ptr);
+//     auto& node = dynamic_cast<Node&>(*node_ptr);
+//     auto& element = dynamic_cast<Element&>(*element_ptr);
 
-    // Assign the connection to the first open terminal
-    if(element.nodes.front().expired())
-    {
-        element.nodes.at(0) = dynamic_pointer_cast<Node>(node_ptr);
-    }
-    else if(element.nodes.back().expired())
-    {
-        element.nodes.at(1) = dynamic_pointer_cast<Node>(node_ptr);
-    }
-    else
-    {
-        // No place for the new connection
-        return;
-    }
+//     // Assign the connection to the first open terminal
+//     if(element.nodes.front().expired())
+//     {
+//         element.nodes.at(0) = dynamic_pointer_cast<Node>(node_ptr);
+//     }
+//     else if(element.nodes.back().expired())
+//     {
+//         element.nodes.at(1) = dynamic_pointer_cast<Node>(node_ptr);
+//     }
+//     else
+//     {
+//         // No place for the new connection
+//         return;
+//     }
 
-    // node.elements.emplace_back(element_weak_ptr);
+//     // node.elements.emplace_back(element_weak_ptr);
 
-    // Return success
-    return;
-}
+//     // Return success
+//     return;
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param first_entity
- * \param second_entity 
- *************************************************************************************************/
-void Network::delete_connection_between(const uint32_t node_uid, const uint32_t element_uid)
-{
-    // Make sure both UIDs actually exist
-    if(uid_does_not_exist(node_uid) || uid_does_not_exist(element_uid))
-    {
-        return;
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param first_entity
+//  * \param second_entity 
+//  *************************************************************************************************/
+// void Network::delete_connection_between(const uint32_t node_uid, const uint32_t element_uid)
+// {
+//     // Make sure both UIDs actually exist
+//     if(uid_does_not_exist(node_uid) || uid_does_not_exist(element_uid))
+//     {
+//         return;
+//     }
 
-    // Self references are forbidden
-    if(node_uid == element_uid)
-    {
-        return;
-    }
+//     // Self references are forbidden
+//     if(node_uid == element_uid)
+//     {
+//         return;
+//     }
 
-    // Make sure that the two entities are a node and a component
-    std::weak_ptr<Unique_Entity> node_weak_ptr = entity_table.at(node_uid);
-    std::weak_ptr<Unique_Entity> element_weak_ptr = entity_table.at(element_uid);
+//     // Make sure that the two entities are a node and a component
+//     std::weak_ptr<Unique_Entity> node_weak_ptr = entity_table.at(node_uid);
+//     std::weak_ptr<Unique_Entity> element_weak_ptr = entity_table.at(element_uid);
 
-    if(node_weak_ptr.expired() || element_weak_ptr.expired())
-    {
-        assert((false) && "Internal pointer index has been corrupted!");
-    }
+//     if(node_weak_ptr.expired() || element_weak_ptr.expired())
+//     {
+//         assert((false) && "Internal pointer index has been corrupted!");
+//     }
 
-    auto node_ptr = node_weak_ptr.lock();
-    auto element_ptr = node_weak_ptr.lock();
+//     auto node_ptr = node_weak_ptr.lock();
+//     auto element_ptr = node_weak_ptr.lock();
 
-    if((node_ptr->type != Entity_Type::Node) &&
-       (element_ptr->type != Entity_Type::Element))
-    {
-        // Node and Element weren't provided
-        return;
-    }
+//     if((node_ptr->type != Entity_Type::Node) &&
+//        (element_ptr->type != Entity_Type::Element))
+//     {
+//         // Node and Element weren't provided
+//         return;
+//     }
 
-    auto& node = dynamic_cast<Node&>(*node_ptr);
-    auto& element = dynamic_cast<Element&>(*element_ptr);
-}
+//     auto& node = dynamic_cast<Node&>(*node_ptr);
+//     auto& element = dynamic_cast<Element&>(*element_ptr);
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param first_entity
- * \param second_entity 
- *************************************************************************************************/
-void Network::create_connection_between(const std::string& node_alias,
-                                        const std::string& element_alias)
-{
-    if(alias_does_not_exist(node_alias) || alias_does_not_exist(element_alias))
-    {
-        return;
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param first_entity
+//  * \param second_entity 
+//  *************************************************************************************************/
+// void Network::create_connection_between(const std::string& node_alias,
+//                                         const std::string& element_alias)
+// {
+//     if(alias_does_not_exist(node_alias) || alias_does_not_exist(element_alias))
+//     {
+//         return;
+//     }
 
-    return create_connection_between(alias_to_id_table.at(node_alias),
-                                     alias_to_id_table.at(element_alias));
-}
+//     return create_connection_between(alias_to_id_table.at(node_alias),
+//                                      alias_to_id_table.at(element_alias));
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param first_entity
- * \param second_entity 
- *************************************************************************************************/
-void Network::delete_connection_between(const std::string& node_alias,
-                                        const std::string& element_alias)
-{
-    if(alias_does_not_exist(node_alias) || alias_does_not_exist(element_alias))
-    {
-        return;
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param first_entity
+//  * \param second_entity 
+//  *************************************************************************************************/
+// void Network::delete_connection_between(const std::string& node_alias,
+//                                         const std::string& element_alias)
+// {
+//     if(alias_does_not_exist(node_alias) || alias_does_not_exist(element_alias))
+//     {
+//         return;
+//     }
 
-    return create_connection_between(alias_to_id_table.at(node_alias),
-                                     alias_to_id_table.at(element_alias));
-}
+//     return create_connection_between(alias_to_id_table.at(node_alias),
+//                                      alias_to_id_table.at(element_alias));
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param uid
- * \param new_alias 
- *************************************************************************************************/
-void Network::update_alias(const uint32_t uid, const std::string& new_alias)
-{
-    if(uid_does_not_exist(uid))
-    {
-        return;
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param uid
+//  * \param new_alias 
+//  *************************************************************************************************/
+// void Network::update_alias(const uint32_t uid, const std::string& new_alias)
+// {
+//     if(uid_does_not_exist(uid))
+//     {
+//         return;
+//     }
 
-    // TODO: Update the alias
-}
+//     // TODO: Update the alias
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param alias
- * \param new_alias 
- *************************************************************************************************/
-void Network::update_alias(const std::string& alias, const std::string& new_alias)
-{
-    if(alias_does_not_exist(alias))
-    {
-        return;
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param alias
+//  * \param new_alias 
+//  *************************************************************************************************/
+// void Network::update_alias(const std::string& alias, const std::string& new_alias)
+// {
+//     if(alias_does_not_exist(alias))
+//     {
+//         return;
+//     }
 
-    update_alias(alias_to_id_table.at(alias), new_alias);
-}
+//     update_alias(alias_to_id_table.at(alias), new_alias);
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param uid 
- *************************************************************************************************/
-void Network::destroy_entity(const uint32_t uid)
-{
-    if(uid_does_not_exist(uid))
-    {
-        return;
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param uid 
+//  *************************************************************************************************/
+// void Network::destroy_entity(const uint32_t uid)
+// {
+//     if(uid_does_not_exist(uid))
+//     {
+//         return;
+//     }
 
-    auto entity_ptr = entity_table.at(uid);
-    const auto alias = entity_ptr->alias;
-    const auto type = entity_ptr->type;
+//     auto entity_ptr = entity_table.at(uid);
+//     const auto alias = entity_ptr->alias;
+//     const auto type = entity_ptr->type;
 
-    if(type == Entity_Type::Node)
-    {
-        auto node_ptr = dynamic_pointer_cast<Node>(entity_ptr);
-        node_ptr.reset();
-        --number_of_nodes;
-    }
-    else if(type == Entity_Type::Element)
-    {
-        auto element_ptr = dynamic_pointer_cast<Element>(entity_ptr);
-        element_ptr.reset();
-        --number_of_elements;
-    }
-    else
-    {
-        assert((false) && "Invalid entity type discovered on destroy");
-    }
+//     if(type == Entity_Type::Node)
+//     {
+//         auto node_ptr = dynamic_pointer_cast<Node>(entity_ptr);
+//         node_ptr.reset();
+//         --number_of_nodes;
+//     }
+//     else if(type == Entity_Type::Element)
+//     {
+//         auto element_ptr = dynamic_pointer_cast<Element>(entity_ptr);
+//         element_ptr.reset();
+//         --number_of_elements;
+//     }
+//     else
+//     {
+//         assert((false) && "Invalid entity type discovered on destroy");
+//     }
 
-    entity_table.erase(uid);
-    alias_to_id_table.erase(alias);
-}
+//     entity_table.erase(uid);
+//     alias_to_id_table.erase(alias);
+// }
 
-/**********************************************************************************************//**
- * \brief 
- * \param alias 
- *************************************************************************************************/
-void Network::destroy_entity(const std::string& alias)
-{
-    if(alias_does_not_exist(alias))
-    {
-        return;
-    }
+// /**********************************************************************************************//**
+//  * \brief 
+//  * \param alias 
+//  *************************************************************************************************/
+// void Network::destroy_entity(const std::string& alias)
+// {
+//     if(alias_does_not_exist(alias))
+//     {
+//         return;
+//     }
 
-    destroy_entity(alias_to_id_table.at(alias));
-}
+//     destroy_entity(alias_to_id_table.at(alias));
+// }
 
 /**********************************************************************************************//**
  * \brief Accessor for number_of_nodes

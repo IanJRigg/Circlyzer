@@ -4,6 +4,7 @@
 #include <array>
 #include <complex>
 #include <map>
+#include <set>
 #include <memory>
 #include <string>
 #include <vector>
@@ -23,6 +24,14 @@ enum class Entity_Type
 
 struct Unique_Entity
 {
+    Unique_Entity(const uint32_t uid, const std::string& alias, const Entity_Type type) :
+        uid { uid },
+        alias { alias },
+        type { type }
+    {
+        
+    }
+
     virtual ~Unique_Entity() = default;
 
     uint32_t uid;
@@ -35,14 +44,21 @@ struct Element : public Unique_Entity
     virtual ~Element() = default;
 
     std::unique_ptr<Component> component;
-    std::array<std::weak_ptr<Node>, 2> nodes;
+    std::array<uint32_t, 2> nodes;
 };
 
 struct Node : public Unique_Entity
 {
+    Node(const uint32_t uid, const std::string& alias, const Entity_Type type) :
+        Unique_Entity(uid, alias, type),
+        elements { }
+    {
+
+    }
+
     virtual ~Node() = default;
 
-    std::map<uint32_t, std::weak_ptr<Element>> uid_to_elements;
+    std::set<uint32_t> elements;
 };
 
 class Network
@@ -53,7 +69,7 @@ public:
 
     // Create Functions
     uint32_t create_node(const std::string& alias="");
-    uint32_t create_element(std::unique_ptr<Component> component, const std::string& alias="");
+    uint32_t create_element(const Component& component, const std::string& alias="");
 
     // Read Functions
     const Component& get_component(uint32_t uid) const;
@@ -89,7 +105,7 @@ private:
     bool uid_does_not_exist(uint32_t uid) const;
     bool alias_does_not_exist(const std::string& alias) const;
 
-    std::map<uint32_t, std::shared_ptr<Unique_Entity>> entity_table;
+    std::map<uint32_t, Unique_Entity> entity_table;
     std::map<std::string, uint32_t> alias_to_id_table;
 
     uint32_t number_of_nodes;
