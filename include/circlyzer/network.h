@@ -1,12 +1,11 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
-#include <array>
-#include <complex>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+#include <set>
 
 #include "component.h"
 
@@ -35,14 +34,14 @@ struct Element : public Unique_Entity
     virtual ~Element() = default;
 
     std::unique_ptr<Component> component;
-    std::array<std::weak_ptr<Node>, 2> nodes;
+    std::vector<uint32_t> nodes;
 };
 
 struct Node : public Unique_Entity
 {
     virtual ~Node() = default;
 
-    std::map<uint32_t, std::weak_ptr<Element>> uid_to_elements;
+    std::set<uint32_t> elements;
 };
 
 class Network

@@ -7,6 +7,7 @@
 
 namespace
 {
+    constexpr auto MAXIMUM_NUMBER_OF_NODES_FOR_ELEMENT = 2U;
     constexpr auto DEFAULT_ALIAS_LENGTH_LIMIT = 25U;
 }
 
@@ -171,8 +172,7 @@ void Network::create_connection_between(const uint32_t node_uid, const uint32_t 
     auto node_ptr = node_weak_ptr.lock();
     auto element_ptr = node_weak_ptr.lock();
 
-    if((node_ptr->type != Entity_Type::Node) &&
-       (element_ptr->type != Entity_Type::Element))
+    if((node_ptr->type != Entity_Type::Node) && (element_ptr->type != Entity_Type::Element))
     {
         // Node and Element weren't provided
         return;
@@ -182,21 +182,21 @@ void Network::create_connection_between(const uint32_t node_uid, const uint32_t 
     auto& element = dynamic_cast<Element&>(*element_ptr);
 
     // Assign the connection to the first open terminal
-    if(element.nodes.front().expired())
+    if(element.nodes.size() < MAXIMUM_NUMBER_OF_NODES_FOR_ELEMENT)
     {
-        element.nodes.at(0) = dynamic_pointer_cast<Node>(node_ptr);
+        element.nodes.emplace_back(node_uid);
     }
-    else if(element.nodes.back().expired())
-    {
-        element.nodes.at(1) = dynamic_pointer_cast<Node>(node_ptr);
-    }
-    else
+    else if(element.nodes.size() > MAXIMUM_NUMBER_OF_NODES_FOR_ELEMENT)
     {
         // No place for the new connection
         return;
     }
+    else
+    {
+        assert((false) && "An element has been connected to too many nodes!");
+    }
 
-    // node.elements.emplace_back(element_weak_ptr);
+    node.elements.emplace(element_uid);
 
     // Return success
     return;
@@ -233,8 +233,7 @@ void Network::delete_connection_between(const uint32_t node_uid, const uint32_t 
     auto node_ptr = node_weak_ptr.lock();
     auto element_ptr = node_weak_ptr.lock();
 
-    if((node_ptr->type != Entity_Type::Node) &&
-       (element_ptr->type != Entity_Type::Element))
+    if((node_ptr->type != Entity_Type::Node) && (element_ptr->type != Entity_Type::Element))
     {
         // Node and Element weren't provided
         return;
@@ -242,6 +241,22 @@ void Network::delete_connection_between(const uint32_t node_uid, const uint32_t 
 
     auto& node = dynamic_cast<Node&>(*node_ptr);
     auto& element = dynamic_cast<Element&>(*element_ptr);
+
+    if(element.nodes.size() > 0 && element.nodes.at(0) == node_uid)
+    {
+        element.nodes.erase(element.nodes.begin());
+    }
+    else if(element.nodes.size() > 1 && element.nodes.at(1) == node_uid)
+    {
+        element.nodes.erase(std::next(element.nodes.begin()));
+    }
+    else
+    {
+        // TODO: What to do here. If it's not here, but passed the checks, this may be an assert
+        return;
+    }
+
+    node.elements.erase(element_uid);
 }
 
 /**********************************************************************************************//**
