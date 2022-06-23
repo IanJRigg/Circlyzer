@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd build
-./test/circlyzer_test
+leaks -atExit -- test/circlyzer_test
