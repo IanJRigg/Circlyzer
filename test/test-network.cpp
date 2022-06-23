@@ -10,7 +10,8 @@ using namespace Circlyzer;
 
 namespace
 {
-    constexpr auto INVALID_UID = 0xDEADBEEFU;
+    constexpr auto INVALID_UID_ONE = 0xDEADBEEFU;
+    constexpr auto INVLAID_UID_TWO = 0xDEADBEEEU;
 
     const auto DEFAULT_RESISTANCE = 1.0_ohm;
 
@@ -208,6 +209,12 @@ TEST(Network, AccessComponentViaAlias)
 
     const auto& resistor_reference = dynamic_cast<const Resistor&>(component);
     EXPECT_EQ(resistor_reference.resistance, DEFAULT_RESISTANCE);
+}
+
+TEST(Network, CreateConnectionWhenUIDsDontExist)
+{
+    Network network;
+
 }
 
 /**********************************************************************************************//**
