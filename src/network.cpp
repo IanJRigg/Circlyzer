@@ -112,13 +112,13 @@ uint32_t Network::create_node(const std::string& alias)
 //         throw Non_Existant_UID_Exception();
 //     }
 
-//     const auto entity_ptr = entity_table.at(uid);
-//     if(entity_ptr->type != Entity_Type::Element)
+//     const auto entity = entity_table.at(uid);
+//     if(entity->type != Entity_Type::Element)
 //     {
 //         throw Wrong_Entity_Type_Exception();
 //     }
 
-//     const auto& element = dynamic_cast<const Element&>(*entity_ptr);
+//     const auto& element = dynamic_cast<const Element&>(entity_ptr);
 
 //     return *(element.component);
 // }
@@ -305,41 +305,39 @@ uint32_t Network::create_node(const std::string& alias)
 //     update_alias(alias_to_id_table.at(alias), new_alias);
 // }
 
-// /**********************************************************************************************//**
-//  * \brief 
-//  * \param uid 
-//  *************************************************************************************************/
-// void Network::destroy_entity(const uint32_t uid)
-// {
-//     if(uid_does_not_exist(uid))
-//     {
-//         return;
-//     }
+/**********************************************************************************************//**
+ * \brief 
+ * \param uid 
+ *************************************************************************************************/
+void Network::destroy_entity(const uint32_t uid)
+{
+    if(uid_does_not_exist(uid))
+    {
+        return;
+    }
 
-//     auto entity_ptr = entity_table.at(uid);
-//     const auto alias = entity_ptr->alias;
-//     const auto type = entity_ptr->type;
+    auto entity = entity_table.at(uid);
 
-//     if(type == Entity_Type::Node)
-//     {
-//         auto node_ptr = dynamic_pointer_cast<Node>(entity_ptr);
-//         node_ptr.reset();
-//         --number_of_nodes;
-//     }
-//     else if(type == Entity_Type::Element)
-//     {
-//         auto element_ptr = dynamic_pointer_cast<Element>(entity_ptr);
-//         element_ptr.reset();
-//         --number_of_elements;
-//     }
-//     else
-//     {
-//         assert((false) && "Invalid entity type discovered on destroy");
-//     }
+    if(entity.type == Entity_Type::Node)
+    {
+        auto node_ptr = dynamic_pointer_cast<Node>(entity_ptr);
+        node_ptr.reset();
+        --number_of_nodes;
+    }
+    else if(entity.type == Entity_Type::Element)
+    {
+        auto element_ptr = dynamic_pointer_cast<Element>(entity_ptr);
+        element_ptr.reset();
+        --number_of_elements;
+    }
+    else
+    {
+        assert((false) && "Invalid entity type discovered on destroy");
+    }
 
-//     entity_table.erase(uid);
-//     alias_to_id_table.erase(alias);
-// }
+    alias_to_id_table.erase(entity.alias);
+    entity_table.erase(entity.uid);
+}
 
 // /**********************************************************************************************//**
 //  * \brief 
