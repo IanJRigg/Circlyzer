@@ -8,6 +8,17 @@
 
 using namespace Circlyzer;
 
+namespace
+{
+    constexpr auto INVALID_UID = 0xDEADBEEFU;
+
+    const auto DEFAULT_RESISTANCE = 1.0_ohm;
+
+    const std::string VALID_ALIAS_ONE = "ONE";
+    const std::string VALID_ALIAS_TWO = "TWO";
+    const std::string TOO_LONG_ALIAS = "This is an alias that is absolutely longer than 25 chars";
+}
+
 /**********************************************************************************************//**
  * Assess that a Network is initialized with the node counter and element counter set to 0
  *************************************************************************************************/
@@ -20,6 +31,25 @@ TEST(Network, Constructor)
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
     EXPECT_EQ(network.get_number_of_elements(), 0);
+}
+
+/**********************************************************************************************//**
+ * Assess that an alias longer than the default length throws an exception
+ *************************************************************************************************/
+TEST(Network, NodeCreationWithTooLongAlias)
+{
+    Network network;
+    EXPECT_THROW(network.create_node(TOO_LONG_ALIAS), Invalid_Alias_Exception);
+}
+
+/**********************************************************************************************//**
+ * Assess that duplicate aliases throw an exception
+ *************************************************************************************************/
+TEST(Network, NodeCreationWithDuplicateAlias)
+{
+    Network network;
+    network.create_node(VALID_ALIAS_ONE);
+    EXPECT_THROW(network.create_node(VALID_ALIAS_ONE), Duplicate_Alias_Exception);
 }
 
 /**********************************************************************************************//**
@@ -56,6 +86,31 @@ TEST(Network, NodeCreation)
 }
 
 /**********************************************************************************************//**
+ * Assess that an alias longer than the default length throws an exception
+ *************************************************************************************************/
+TEST(Network, ElementCreationWithTooLongAlias)
+{
+    Network network;
+    auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
+    EXPECT_THROW(network.create_element(std::move(resistor), TOO_LONG_ALIAS), 
+                 Invalid_Alias_Exception);
+}
+
+/**********************************************************************************************//**
+ * Assess that duplicate aliases throw an exception
+ *************************************************************************************************/
+TEST(Network, ElementCreationWithDuplicateAlias)
+{
+    Network network;
+    auto resistor_one = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
+    network.create_element(std::move(resistor_one), VALID_ALIAS_ONE);
+
+    auto resistor_two = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
+    EXPECT_THROW(network.create_element(std::move(resistor_two), VALID_ALIAS_ONE),
+                 Duplicate_Alias_Exception);
+}
+
+/**********************************************************************************************//**
  * Assess that elements get created, UIDs get assigned as expected and the element counter 
  * increments accordingly
  *************************************************************************************************/
@@ -69,7 +124,7 @@ TEST(Network, ElementCreation)
     EXPECT_EQ(network.get_number_of_nodes(), 0);
     EXPECT_EQ(network.get_number_of_elements(), 0);
 
-    auto resistor = std::make_unique<Resistor>(1.0_ohm);
+    auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
     auto first_uid = network.create_element(std::move(resistor));
 
     // Make sure that ownership has been correctly transfered away from resistor
@@ -89,7 +144,7 @@ TEST(Network, ElementCreation)
 TEST(Network, AccessComponentWithInvalidUid)
 {
     Network network;
-    EXPECT_THROW(network.get_component(0xDEADBEEFU), Non_Existant_UID_Exception);
+    EXPECT_THROW(network.get_component(INVALID_UID), Non_Existant_UID_Exception);
 }
 
 /**********************************************************************************************//**
@@ -109,13 +164,13 @@ TEST(Network, AccessComponentWithInvalidType)
 TEST(Network, AccessComponent)
 {
     Network network;
-    auto resistor = std::make_unique<Resistor>(1.0_ohm);
+    auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
     auto first_uid = network.create_element(std::move(resistor));
     const auto& component = network.get_component(first_uid);
     EXPECT_EQ(component.type, Component_Type::Resistor);
 
     const auto& resistor_reference = dynamic_cast<const Resistor&>(component);
-    EXPECT_EQ(resistor_reference.resistance, 1.0_ohm);
+    EXPECT_EQ(resistor_reference.resistance, DEFAULT_RESISTANCE);
 }
 
 /**********************************************************************************************//**
@@ -124,7 +179,7 @@ TEST(Network, AccessComponent)
 TEST(Network, AccessComponentWithInvalidAlias)
 {
     Network network;
-    EXPECT_THROW(network.get_component("DEAD BEEF!"), Non_Existant_Alias_Exception);
+    EXPECT_THROW(network.get_component(VALID_ALIAS_ONE), Non_Existant_Alias_Exception);
 }
 
 /**********************************************************************************************//**
@@ -133,7 +188,7 @@ TEST(Network, AccessComponentWithInvalidAlias)
 TEST(Network, AccessComponentViaAliasWithInvalidType)
 {
     Network network;
-    auto first_uid = network.create_node("DEAD BEEF!");
+    auto first_uid = network.create_node(VALID_ALIAS_ONE);
     EXPECT_THROW(network.get_component(first_uid), Wrong_Entity_Type_Exception);
 }
 
@@ -144,14 +199,14 @@ TEST(Network, AccessComponentViaAliasWithInvalidType)
 TEST(Network, AccessComponentViaAlias)
 {
     Network network;
-    auto resistor = std::make_unique<Resistor>(1.0_ohm);
-    auto first_uid = network.create_element(std::move(resistor), "DEAD BEEF!");
-    const auto& component = network.get_component("DEAD BEEF!");
+    auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
+    auto first_uid = network.create_element(std::move(resistor), VALID_ALIAS_ONE);
+    const auto& component = network.get_component(VALID_ALIAS_ONE);
 
     EXPECT_EQ(component.type, Component_Type::Resistor);
 
     const auto& resistor_reference = dynamic_cast<const Resistor&>(component);
-    EXPECT_EQ(resistor_reference.resistance, 1.0_ohm);
+    EXPECT_EQ(resistor_reference.resistance, DEFAULT_RESISTANCE);
 }
 
 /**********************************************************************************************//**
@@ -168,7 +223,7 @@ TEST(Network, DestroyNodeWhenNoneExist)
     EXPECT_EQ(network.get_number_of_elements(), 0);
 
     // Destroy a fake node
-    network.destroy_node(0xDEADBEEF);
+    network.destroy_node(INVALID_UID);
 
     // Check entity counts
     EXPECT_EQ(network.get_number_of_entities(), 0);

@@ -63,8 +63,6 @@ uint32_t Network::create_node(const std::string& alias)
  *************************************************************************************************/
 uint32_t Network::create_element(std::unique_ptr<Component> component, const std::string& alias)
 {
-    // TODO: don't populate the alias if given an empty alias?
-    // TODO: what to do if a duplicate alias is provided?
     if(component == nullptr)
     {
         throw Null_Component_Exception();
