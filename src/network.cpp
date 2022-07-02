@@ -7,6 +7,7 @@
 
 namespace
 {
+    constexpr auto MAXIMUM_NUMBER_OF_NODES_FOR_ELEMENT = 2U;
     constexpr auto DEFAULT_ALIAS_LENGTH_LIMIT = 25U;
 }
 
@@ -19,7 +20,8 @@ Network::Network() :
     entity_table(),
     alias_to_id_table(),
     number_of_nodes{ 0U },
-    number_of_elements{ 0U }
+    number_of_branches{ 0U },
+    number_of_components { 0U }
 {
 
 }
@@ -307,7 +309,6 @@ uint32_t Network::create_node(const std::string& alias)
 
 /**********************************************************************************************//**
  * \brief 
- * \param uid 
  *************************************************************************************************/
 void Network::destroy_entity(const uint32_t uid)
 {
@@ -320,15 +321,15 @@ void Network::destroy_entity(const uint32_t uid)
 
     if(entity.type == Entity_Type::Node)
     {
-        auto node_ptr = dynamic_pointer_cast<Node>(entity_ptr);
-        node_ptr.reset();
-        --number_of_nodes;
+        // auto node_ptr = dynamic_pointer_cast<Node>(entity);
+        // node_ptr.reset();
+        // --number_of_nodes;
     }
-    else if(entity.type == Entity_Type::Element)
+    else if(entity.type == Entity_Type::Branch)
     {
-        auto element_ptr = dynamic_pointer_cast<Element>(entity_ptr);
-        element_ptr.reset();
-        --number_of_elements;
+        // auto branch = dynamic_pointer_cast<Branch>(entity);
+        // branch_ptr.reset();
+        // --number_of_components;
     }
     else
     {
@@ -378,11 +379,19 @@ uint32_t Network::get_number_of_nodes() const
 }
 
 /**********************************************************************************************//**
- * \brief Accessor for number_of_elements
+ * \brief Accessor for number_of_branches
  *************************************************************************************************/
-uint32_t Network::get_number_of_elements() const
+uint32_t Network::get_number_of_branches() const
 {
-    return number_of_elements;
+    return number_of_branches;
+}
+
+/**********************************************************************************************//**
+ * \brief Accessor for number_of_components
+ *************************************************************************************************/
+uint32_t Network::get_number_of_components() const
+{
+    return number_of_components;
 }
 
 /**********************************************************************************************//**
@@ -412,7 +421,6 @@ uint32_t Network::find_valid_uid() const
 
 /**********************************************************************************************//**
  * \brief 
- * \param alias 
  *************************************************************************************************/
 bool Network::uid_does_not_exist(const uint32_t uid) const
 {
@@ -421,9 +429,30 @@ bool Network::uid_does_not_exist(const uint32_t uid) const
 
 /**********************************************************************************************//**
  * \brief 
- * \param alias 
  *************************************************************************************************/
 bool Network::alias_does_not_exist(const std::string& alias) const
 {
     return (alias_to_id_table.find(alias) == alias_to_id_table.end());
+}
+
+/**********************************************************************************************//**
+ * /brief
+ *************************************************************************************************/
+void Network::check_for_new_meshes(const uint32_t changed_branch_uid)
+{
+    // If no loops exist, the first loop discovered will
+    // NOTE: Only one mesh can be added to the network at any given time (This needs to be proven)
+    // NOTE: An existing mesh can be split into multiple sub-loops however
+    
+    // DFS from the changed UID
+}
+
+/**********************************************************************************************//**
+ * \brief 
+ *************************************************************************************************/
+void Network::check_for_broken_meshes(const uint32_t changed_branch_uid)
+{
+    // Check each of the meshes for the given UID
+    // If any meshes contain that UID, remove those meshes from use
+    // If more than one mesh uses a UID, merge the meshes (Need to prove more than 2 meshes can exist with one node)
 }

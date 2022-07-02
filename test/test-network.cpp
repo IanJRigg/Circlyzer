@@ -10,7 +10,8 @@ using namespace Circlyzer;
 
 namespace
 {
-    constexpr auto INVALID_UID = 0xDEADBEEFU;
+    constexpr auto INVALID_UID_ONE = 0xDEADBEEFU;
+    constexpr auto INVLAID_UID_TWO = 0xDEADBEEEU;
 
     const auto DEFAULT_RESISTANCE = 1.0_ohm;
 
@@ -21,7 +22,7 @@ namespace
 }
 
 /**********************************************************************************************//**
- * Assess that a Network is initialized with the node counter and element counter set to 0
+ * Assess that a Network is initialized with the node counter and branch counter set to 0
  *************************************************************************************************/
 TEST(Network, Constructor)
 {
@@ -31,7 +32,7 @@ TEST(Network, Constructor)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 }
 
 /**********************************************************************************************//**
@@ -65,7 +66,7 @@ TEST(Network, NodeCreation)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 
     auto first_uid = network.create_node();
 
@@ -73,7 +74,7 @@ TEST(Network, NodeCreation)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
     EXPECT_EQ(first_uid, 0);
 
     auto second_uid = network.create_node();
@@ -82,7 +83,7 @@ TEST(Network, NodeCreation)
     EXPECT_EQ(network.get_number_of_entities(), 2);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 2);
-    EXPECT_EQ(network.get_number_of_elements(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
     EXPECT_EQ(second_uid, 1);
 }
 
