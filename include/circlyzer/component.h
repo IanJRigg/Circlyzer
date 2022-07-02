@@ -16,6 +16,7 @@ enum class Component_Type : uint32_t
 
 struct Component
 {
+    Component() = delete;
     Component(const Component_Type type) :
         type(type) 
     { 
@@ -24,7 +25,7 @@ struct Component
 
     virtual ~Component() = default;
 
-    Component_Type type;
+    const Component_Type type;
 };
 
 struct Resistor : Component

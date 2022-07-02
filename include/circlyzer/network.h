@@ -40,7 +40,30 @@ struct Unique_Entity
 
 struct Branch : public Unique_Entity
 {
+    Branch(const uint32_t uid,
+           const std::string& alias,
+           const Entity_Type type,
+           std::unique_ptr<Component> component) :
+        Unique_Entity(uid, alias, type),
+        component(std::move(component))
+    {
+
+    }
+
+    // TODO: Finish the rule of 5 implementation here
+
+    // The resource requiring the rule of 5 is in a managed container.
+    // Because of this, there's no need to explicitly free that resource
     virtual ~Branch() = default;
+
+    Branch(Branch& other) = delete;
+
+    Branch(Branch&& other) :
+        Unique_Entity(other.uid, other.alias, other.type),
+        component(std::move(other.component))
+    {
+
+    }
 
     std::unique_ptr<Component> component;
     std::vector<uint32_t> nodes;
@@ -97,7 +120,6 @@ public:
     uint32_t get_number_of_aliases() const;
     uint32_t get_number_of_nodes() const;
     uint32_t get_number_of_branches() const;
-    uint32_t get_number_of_components() const;
 
 private:
     // Internal utility functions
@@ -108,13 +130,10 @@ private:
     void check_for_new_meshes(uint32_t changed_branch_uid);
     void check_for_broken_meshes(uint32_t changed_branch_uid);
 
-    std::map<uint32_t, Unique_Entity> entity_table;
-    std::map<std::string, uint32_t> alias_to_id_table;
-
-    uint32_t number_of_nodes;
-    uint32_t number_of_branches;
-    uint32_t number_of_components;
-
+    std::map<uint32_t, Entity_Type> entity_lookup;
+    std::map<uint32_t, Node> node_table;
+    std::map<uint32_t, Branch> branch_table;
+    std::map<std::string, uint32_t> alias_lookup;
 };
 
 } // Namespace Circlyzer
