@@ -32,7 +32,7 @@ TEST(Network, Constructor)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 }
 
 /**********************************************************************************************//**
@@ -66,7 +66,7 @@ TEST(Network, NodeCreation)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 
     auto first_uid = network.create_node();
 
@@ -74,7 +74,7 @@ TEST(Network, NodeCreation)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
     EXPECT_EQ(first_uid, 0);
 
     auto second_uid = network.create_node();
@@ -83,7 +83,7 @@ TEST(Network, NodeCreation)
     EXPECT_EQ(network.get_number_of_entities(), 2);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 2);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
     EXPECT_EQ(second_uid, 1);
 }
 
@@ -124,7 +124,7 @@ TEST(Network, BranchCreation)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 
     auto resistor = std::make_unique<Resistor>(DEFAULT_RESISTANCE);
     auto first_uid = network.create_branch(std::move(resistor));
@@ -136,7 +136,7 @@ TEST(Network, BranchCreation)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 1);
+    EXPECT_EQ(network.get_number_of_components(), 1);
     EXPECT_EQ(first_uid, 0);
 }
 
@@ -234,7 +234,7 @@ TEST(Network, DestroyEntityWhenNoneExist)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 
     // Destroy a fake node
     network.destroy_entity(INVALID_UID_ONE);
@@ -243,7 +243,7 @@ TEST(Network, DestroyEntityWhenNoneExist)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 }
 
 /**********************************************************************************************//**
@@ -258,7 +258,7 @@ TEST(Network, DestroyEntityToDestroyNode)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 
     // Destroy the node. This should clear all the entity counts
     network.destroy_entity(node_uid);
@@ -267,7 +267,7 @@ TEST(Network, DestroyEntityToDestroyNode)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 }
 
 /**********************************************************************************************//**
@@ -283,7 +283,7 @@ TEST(Network, DestroyEntityToDestroyBranch)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 1);
+    EXPECT_EQ(network.get_number_of_components(), 1);
 
     // Destroy the branch. This should clear all the entity counts
     network.destroy_entity(branch_uid);
@@ -292,7 +292,7 @@ TEST(Network, DestroyEntityToDestroyBranch)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 }
 
 /**********************************************************************************************//**
@@ -307,7 +307,7 @@ TEST(Network, DestroyEntityViaAliasWhenNoneExist)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 1);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 
     // Destroy a fake node
     network.destroy_entity(INVALID_ALIAS);
@@ -316,7 +316,7 @@ TEST(Network, DestroyEntityViaAliasWhenNoneExist)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 1);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 }
 
 /**********************************************************************************************//**
@@ -331,7 +331,7 @@ TEST(Network, DestroyEntityViaAliasToDestroyNode)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 1);
     EXPECT_EQ(network.get_number_of_nodes(), 1);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 
     // Destroy the node. This should clear all the entity counts
     network.destroy_entity(VALID_ALIAS_ONE);
@@ -340,7 +340,7 @@ TEST(Network, DestroyEntityViaAliasToDestroyNode)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 }
 
 /**********************************************************************************************//**
@@ -356,7 +356,7 @@ TEST(Network, DestroyEntityViaAliasToDestroyBranch)
     EXPECT_EQ(network.get_number_of_entities(), 1);
     EXPECT_EQ(network.get_number_of_aliases(), 1);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 1);
+    EXPECT_EQ(network.get_number_of_components(), 1);
 
     // Destroy the branch. This should clear all the entity counts
     network.destroy_entity(VALID_ALIAS_ONE);
@@ -365,5 +365,5 @@ TEST(Network, DestroyEntityViaAliasToDestroyBranch)
     EXPECT_EQ(network.get_number_of_entities(), 0);
     EXPECT_EQ(network.get_number_of_aliases(), 0);
     EXPECT_EQ(network.get_number_of_nodes(), 0);
-    EXPECT_EQ(network.get_number_of_branches(), 0);
+    EXPECT_EQ(network.get_number_of_components(), 0);
 }

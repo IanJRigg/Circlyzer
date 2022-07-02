@@ -81,6 +81,7 @@ public:
     uint32_t get_number_of_aliases() const;
     uint32_t get_number_of_nodes() const;
     uint32_t get_number_of_branches() const;
+    uint32_t get_number_of_components() const;
 
 private:
     // Internal utility functions
@@ -88,11 +89,15 @@ private:
     bool uid_does_not_exist(uint32_t uid) const;
     bool alias_does_not_exist(const std::string& alias) const;
 
+    void check_for_new_meshes(uint32_t changed_branch_uid);
+    void check_for_broken_meshes(uint32_t changed_branch_uid);
+
     std::map<uint32_t, std::shared_ptr<Unique_Entity>> entity_table;
     std::map<std::string, uint32_t> alias_to_id_table;
 
     uint32_t number_of_nodes;
     uint32_t number_of_branches;
+    uint32_t number_of_components;
 
 };
 

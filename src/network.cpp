@@ -20,7 +20,8 @@ Network::Network() :
     entity_table(),
     alias_to_id_table(),
     number_of_nodes{ 0U },
-    number_of_branches{ 0U }
+    number_of_branches{ 0U },
+    number_of_components { 0U }
 {
 
 }
@@ -63,8 +64,6 @@ uint32_t Network::create_node(const std::string& alias)
 
 /**********************************************************************************************//**
  * \brief 
- * \param component
- * \param alias
  *************************************************************************************************/
 uint32_t Network::create_branch(std::unique_ptr<Component> component, const std::string& alias)
 {
@@ -100,14 +99,13 @@ uint32_t Network::create_branch(std::unique_ptr<Component> component, const std:
 
     // Insert the branch
     entity_table.insert({ branch->uid, branch });
-    ++number_of_branches;
+    ++number_of_components;
 
     return branch->uid;
 }
 
 /**********************************************************************************************//**
  * \brief 
- * \param uid 
  *************************************************************************************************/
 const Component& Network::get_component(const uint32_t uid) const
 {
@@ -129,7 +127,6 @@ const Component& Network::get_component(const uint32_t uid) const
 
 /**********************************************************************************************//**
  * \brief 
- * \param alias 
  *************************************************************************************************/
 const Component& Network::get_component(const std::string& alias) const
 {
@@ -143,8 +140,6 @@ const Component& Network::get_component(const std::string& alias) const
 
 /**********************************************************************************************//**
  * \brief 
- * \param first_entity
- * \param second_entity 
  *************************************************************************************************/
 void Network::create_connection_between(const uint32_t node_uid, const uint32_t branch_uid)
 {
@@ -186,7 +181,7 @@ void Network::create_connection_between(const uint32_t node_uid, const uint32_t 
     {
         branch.nodes.emplace_back(node_uid);
     }
-    else if(branch.nodes.size() > MAXIMUM_NUMBER_OF_NODES_FOR_ELEMENT)
+    else if(branch.nodes.size() == MAXIMUM_NUMBER_OF_NODES_FOR_ELEMENT)
     {
         // No place for the new connection
         return;
@@ -198,14 +193,14 @@ void Network::create_connection_between(const uint32_t node_uid, const uint32_t 
 
     node.branches.emplace(branch_uid);
 
+    // Assess how many branches, loops, etc. now exist
+
     // Return success
     return;
 }
 
 /**********************************************************************************************//**
  * \brief 
- * \param first_entity
- * \param second_entity 
  *************************************************************************************************/
 void Network::delete_connection_between(const uint32_t node_uid, const uint32_t branch_uid)
 {
@@ -257,12 +252,14 @@ void Network::delete_connection_between(const uint32_t node_uid, const uint32_t 
     }
 
     node.branches.erase(branch_uid);
+
+    // Assess how many branches, loops, etc. now exist
+
+    return;
 }
 
 /**********************************************************************************************//**
  * \brief 
- * \param first_entity
- * \param second_entity 
  *************************************************************************************************/
 void Network::create_connection_between(const std::string& node_alias,
                                         const std::string& branch_alias)
@@ -278,8 +275,6 @@ void Network::create_connection_between(const std::string& node_alias,
 
 /**********************************************************************************************//**
  * \brief 
- * \param first_entity
- * \param second_entity 
  *************************************************************************************************/
 void Network::delete_connection_between(const std::string& node_alias,
                                         const std::string& branch_alias)
@@ -295,8 +290,6 @@ void Network::delete_connection_between(const std::string& node_alias,
 
 /**********************************************************************************************//**
  * \brief 
- * \param uid
- * \param new_alias 
  *************************************************************************************************/
 void Network::update_alias(const uint32_t uid, const std::string& new_alias)
 {
@@ -310,8 +303,6 @@ void Network::update_alias(const uint32_t uid, const std::string& new_alias)
 
 /**********************************************************************************************//**
  * \brief 
- * \param alias
- * \param new_alias 
  *************************************************************************************************/
 void Network::update_alias(const std::string& alias, const std::string& new_alias)
 {
@@ -325,7 +316,6 @@ void Network::update_alias(const std::string& alias, const std::string& new_alia
 
 /**********************************************************************************************//**
  * \brief 
- * \param uid 
  *************************************************************************************************/
 void Network::destroy_entity(const uint32_t uid)
 {
@@ -348,7 +338,7 @@ void Network::destroy_entity(const uint32_t uid)
     {
         auto branch_ptr = dynamic_pointer_cast<Branch>(entity_ptr);
         branch_ptr.reset();
-        --number_of_branches;
+        --number_of_components;
     }
     else
     {
@@ -361,7 +351,6 @@ void Network::destroy_entity(const uint32_t uid)
 
 /**********************************************************************************************//**
  * \brief 
- * \param alias 
  *************************************************************************************************/
 void Network::destroy_entity(const std::string& alias)
 {
@@ -406,6 +395,14 @@ uint32_t Network::get_number_of_branches() const
 }
 
 /**********************************************************************************************//**
+ * \brief Accessor for number_of_components
+ *************************************************************************************************/
+uint32_t Network::get_number_of_components() const
+{
+    return number_of_components;
+}
+
+/**********************************************************************************************//**
  * \brief Iterates over the entity table. Since the std::map is stored in sorted order, the
  *        iteration will happen in sorted order. If N uids have been reserved, and they were all
  *        allocated in perfect serial order, this function will return N + 1. If a gap exists in
@@ -432,7 +429,6 @@ uint32_t Network::find_valid_uid() const
 
 /**********************************************************************************************//**
  * \brief 
- * \param alias 
  *************************************************************************************************/
 bool Network::uid_does_not_exist(const uint32_t uid) const
 {
@@ -441,9 +437,30 @@ bool Network::uid_does_not_exist(const uint32_t uid) const
 
 /**********************************************************************************************//**
  * \brief 
- * \param alias 
  *************************************************************************************************/
 bool Network::alias_does_not_exist(const std::string& alias) const
 {
     return (alias_to_id_table.find(alias) == alias_to_id_table.end());
+}
+
+/**********************************************************************************************//**
+ * /brief
+ *************************************************************************************************/
+void Network::check_for_new_meshes(const uint32_t changed_branch_uid)
+{
+    // If no loops exist, the first loop discovered will
+    // NOTE: Only one mesh can be added to the network at any given time (This needs to be proven)
+    // NOTE: An existing mesh can be split into multiple sub-loops however
+    
+    // DFS from the changed UID
+}
+
+/**********************************************************************************************//**
+ * \brief 
+ *************************************************************************************************/
+void Network::check_for_broken_meshes(const uint32_t changed_branch_uid)
+{
+    // Check each of the meshes for the given UID
+    // If any meshes contain that UID, remove those meshes from use
+    // If more than one mesh uses a UID, merge the meshes (Need to prove more than 2 meshes can exist with one node)
 }
