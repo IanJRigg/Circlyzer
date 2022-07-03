@@ -57,6 +57,7 @@ struct Branch : public Unique_Entity
     virtual ~Branch() = default;
 
     Branch(Branch& other) = delete;
+    Branch& operator=(const Branch& other) = delete;
 
     Branch(Branch&& other) :
         Unique_Entity(other.uid, other.alias, other.type),
@@ -126,6 +127,8 @@ private:
     uint32_t find_valid_uid() const;
     bool uid_does_not_exist(uint32_t uid) const;
     bool alias_does_not_exist(const std::string& alias) const;
+    bool node_does_not_exist(uint32_t uid) const;
+    bool branch_does_not_exist(uint32_t uid) const;
 
     void check_for_new_meshes(uint32_t changed_branch_uid);
     void check_for_broken_meshes(uint32_t changed_branch_uid);
@@ -134,6 +137,8 @@ private:
     std::map<uint32_t, Node> node_table;
     std::map<uint32_t, Branch> branch_table;
     std::map<std::string, uint32_t> alias_lookup;
+
+    std::vector<std::vector<uint32_t>> mesh_table;
 };
 
 } // Namespace Circlyzer
